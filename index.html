@@ -131,10 +131,34 @@
             font-size: 14px;
         }
 
-        /* SOUND INDICATOR - Above word counter */
+        /* FONT SIZE DISPLAY - Above word count */
+        .size-display {
+            position: fixed;
+            bottom: 65px;
+            left: 20px;
+            z-index: 10;
+            color: rgba(255, 255, 255, 0.4);
+            font-size: 11px;
+            pointer-events: none;
+            opacity: 0.6;
+        }
+
+        /* FONT DISPLAY - Above font size */
+        .font-display {
+            position: fixed;
+            bottom: 82px;
+            left: 20px;
+            z-index: 10;
+            color: rgba(255, 255, 255, 0.4);
+            font-size: 11px;
+            pointer-events: none;
+            opacity: 0.6;
+        }
+
+        /* SOUND INDICATOR - Top left */
         .sound-indicator {
             position: fixed;
-            bottom: 45px;
+            top: 20px;
             left: 20px;
             z-index: 10;
             color: rgba(255, 255, 255, 0.2);
@@ -149,32 +173,15 @@
             opacity: 0.6;
         }
 
-        /* PROJECT TITLE - Top left corner */
+        /* PROJECT TITLE - Top left, below FX */
         .project-title {
             position: fixed;
-            top: 20px;
+            top: 42px;
             left: 20px;
             z-index: 10;
             color: rgba(255, 255, 255, 0.3);
             font-size: 13px;
             pointer-events: none;
-        }
-
-        /* FONT INDICATOR - Top right corner */
-        .font-indicator {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            z-index: 10;
-            color: rgba(255, 255, 255, 0.3);
-            font-size: 11px;
-            pointer-events: none;
-            opacity: 0;
-            transition: opacity 0.3s;
-        }
-
-        .font-indicator.visible {
-            opacity: 1;
         }
 
         .shortcuts-hint {
@@ -799,14 +806,17 @@
 
     <div class="word-count" id="wordCount">0 words</div>
 
+    <!-- FONT SIZE DISPLAY -->
+    <div class="size-display" id="sizeDisplay">20px</div>
+
+    <!-- FONT DISPLAY -->
+    <div class="font-display" id="fontDisplay">Georgia</div>
+
     <!-- SOUND INDICATOR -->
     <div class="sound-indicator" id="soundIndicator">FX off</div>
 
     <!-- PROJECT TITLE -->
     <div class="project-title" id="projectTitle">Untitled</div>
-
-    <!-- FONT INDICATOR -->
-    <div class="font-indicator" id="fontIndicator">Georgia</div>
 
     <!-- KEYBOARD SHORTCUTS REMINDER -->
     <div class="shortcuts-hint">
@@ -999,7 +1009,7 @@ const textSizes = {
     large: 24
 };
 
-const fonts = ['Georgia', 'Courier New', 'Times New Roman'];
+const fonts = ['Georgia', 'Traveling Typewriter', 'Drafting Mono'];
 
 // PROJECTS SYSTEM
 let projects = [];
@@ -1052,6 +1062,7 @@ function init() {
         loadSavedText();
         loadIdeas();
         loadTextSize();
+        loadFont();
         updateWordCount();
         changeBackground();
         updateHashtagLibrary();
@@ -1163,10 +1174,15 @@ function init() {
                     toggleSound();
                 }
 
-                // Font cycle - using ⌘] (right bracket)
+                // Font cycle - using ⌘] (forward) and ⌘[ (backward)
                 if (mod && e.key === ']') {
                     e.preventDefault();
-                    cycleFont();
+                    cycleFont(1);
+                }
+
+                if (mod && e.key === '[') {
+                    e.preventDefault();
+                    cycleFont(-1);
                 }
 
                 if (mod && e.key === 'f') {
@@ -1392,14 +1408,14 @@ function init() {
 
         // === FONT SELECTION ===
 
-        function cycleFont() {
+        function cycleFont(direction = 1) {
             const currentIndex = fonts.indexOf(currentFont);
-            const nextIndex = (currentIndex + 1) % fonts.length;
+            const nextIndex = (currentIndex + direction + fonts.length) % fonts.length;
             currentFont = fonts[nextIndex];
 
             applyFont();
             saveFont();
-            showFontIndicator();
+            updateFontDisplay();
         }
 
         function applyFont() {
@@ -1422,16 +1438,14 @@ function init() {
                 currentFont = 'Georgia'; // Default
             }
             applyFont();
+            updateFontDisplay();
         }
 
-        function showFontIndicator() {
-            const indicator = document.getElementById('fontIndicator');
-            indicator.textContent = currentFont;
-            indicator.classList.add('visible');
-
-            setTimeout(() => {
-                indicator.classList.remove('visible');
-            }, 1500);
+        function updateFontDisplay() {
+            const fontDisplay = document.getElementById('fontDisplay');
+            if (fontDisplay) {
+                fontDisplay.textContent = currentFont;
+            }
         }
 
         // === FULLSCREEN MODE ===
@@ -1469,6 +1483,7 @@ function init() {
             }
             // Already at large, do nothing
             applyTextSize();
+            updateSizeDisplay();
         }
 
         function decreaseTextSize() {
@@ -1479,6 +1494,7 @@ function init() {
             }
             // Already at small, do nothing
             applyTextSize();
+            updateSizeDisplay();
         }
 
         function applyTextSize() {
@@ -1492,6 +1508,15 @@ function init() {
             if (saved && textSizes[saved]) {
                 currentTextSize = saved;
                 applyTextSize();
+            }
+            updateSizeDisplay();
+        }
+
+        function updateSizeDisplay() {
+            const sizeDisplay = document.getElementById('sizeDisplay');
+            if (sizeDisplay) {
+                const size = textSizes[currentTextSize];
+                sizeDisplay.textContent = size + 'px';
             }
         }
 
