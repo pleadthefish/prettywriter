@@ -1,0 +1,2874 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PrettyWriter</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        @font-face {
+            font-family: 'Traveling Typewriter';
+            src: url('./typefaces/TravelingTypewriter.ttf') format('truetype');
+        }
+
+        @font-face {
+            font-family: 'Drafting Mono';
+            src: url('./typefaces/drafting-mono.light.ttf') format('truetype');
+        }
+
+        body {
+            font-family: 'Georgia', serif;
+            background: #1a1a1a;
+            color: #e0e0e0;
+            overflow: hidden;
+            height: 100vh;
+        }
+
+        .bg-image {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-size: cover;
+            background-position: center;
+            transition: opacity 1s ease;
+            z-index: 1;
+        }
+
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            z-index: 2;
+        }
+
+        .editor-container {
+            position: relative;
+            z-index: 3;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 60px 20px;
+            transition: padding-right 0.3s ease; /* Smooth transition when panel opens */
+        }
+
+        /* Shift editor left when ideas panel is open */
+        .editor-container.shifted {
+            padding-right: 470px; /* Width of panel + margin */
+        }
+
+        textarea {
+            width: 100%;
+            max-width: 800px;
+            height: 70vh;
+            background: transparent;
+            border: none;
+            outline: none;
+            color: #ffffff;
+            font-size: 20px;
+            line-height: 1.8;
+            resize: none;
+            font-family: 'Georgia', serif;
+        }
+
+        /* Main editor scrollbar - Safari-compatible invisible style */
+        textarea::-webkit-scrollbar {
+            width: 0px; /* Completely hidden */
+            display: none;
+        }
+
+        textarea::-webkit-scrollbar-track {
+            background: transparent;
+            border: none;
+        }
+
+        textarea::-webkit-scrollbar-thumb {
+            background: transparent;
+        }
+
+        /* Firefox - also hide */
+        textarea {
+            scrollbar-width: none;
+        }
+
+        .prompt-display {
+            position: fixed;
+            bottom: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 10;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 20px 40px;
+            border-radius: 30px;
+            max-width: 600px;
+            text-align: center;
+            opacity: 0;
+            transition: opacity 0.5s;
+            pointer-events: none;
+        }
+
+        .prompt-display.visible {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .word-count {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            z-index: 10;
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 14px;
+        }
+
+        /* SOUND INDICATOR - Above word counter */
+        .sound-indicator {
+            position: fixed;
+            bottom: 45px;
+            left: 20px;
+            z-index: 10;
+            color: rgba(255, 255, 255, 0.2);
+            font-size: 11px;
+            transition: all 0.3s;
+            opacity: 0.3;
+            pointer-events: none;
+        }
+
+        .sound-indicator.active {
+            color: rgba(255, 255, 255, 0.4);
+            opacity: 0.6;
+        }
+
+        /* PROJECT TITLE - Top left corner */
+        .project-title {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 10;
+            color: rgba(255, 255, 255, 0.3);
+            font-size: 13px;
+            pointer-events: none;
+        }
+
+        /* FONT INDICATOR - Top right corner */
+        .font-indicator {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 10;
+            color: rgba(255, 255, 255, 0.3);
+            font-size: 11px;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .font-indicator.visible {
+            opacity: 1;
+        }
+
+        .shortcuts-hint {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 10;
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 11px;
+            text-align: right;
+            line-height: 1.8;
+            opacity: 0.6;
+            transition: opacity 0.3s;
+        }
+
+        .shortcuts-hint:hover {
+            opacity: 0.9;
+        }
+
+        .export-menu {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(15, 15, 15, 0.98);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            padding: 25px 30px;
+            z-index: 30;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s;
+            min-width: 300px;
+        }
+
+        .export-menu.visible {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .export-menu h3 {
+            font-size: 18px;
+            font-weight: normal;
+            margin-bottom: 20px;
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        .export-option {
+            padding: 12px 15px;
+            margin-bottom: 8px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .export-option:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+
+        .export-option-label {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 14px;
+        }
+
+        .export-option-key {
+            color: rgba(255, 255, 255, 0.4);
+            font-size: 12px;
+            font-family: monospace;
+        }
+
+        .export-hint {
+            margin-top: 15px;
+            font-size: 11px;
+            color: rgba(255, 255, 255, 0.3);
+            font-style: italic;
+            text-align: center;
+        }
+
+        .ideas-panel {
+            position: fixed;
+            top: 0;
+            right: -450px;
+            width: 450px;
+            height: 100vh;
+            background: rgba(15, 15, 15, 0.98);
+            backdrop-filter: blur(20px);
+            z-index: 20;
+            transition: right 0.3s ease;
+            border-left: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .ideas-panel.open {
+            right: 0;
+        }
+
+        .ideas-header {
+            padding: 25px 20px 15px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .ideas-header h2 {
+            font-size: 16px;
+            font-weight: normal;
+            margin-bottom: 12px;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .search-input {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 6px;
+            padding: 8px 10px;
+            color: white;
+            font-size: 12px;
+            font-family: 'Georgia', serif;
+            margin-bottom: 12px;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: rgba(255, 255, 255, 0.3);
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .search-input::placeholder {
+            color: rgba(255, 255, 255, 0.3);
+        }
+
+        /* HASHTAG LIBRARY - Shows all used hashtags */
+        .hashtag-library {
+            margin-bottom: 12px;
+            padding: 8px 0;
+        }
+
+        .hashtag-library-label {
+            font-size: 10px;
+            color: rgba(255, 255, 255, 0.4);
+            margin-bottom: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .hashtag-pills {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+
+        .hashtag-pill {
+            background: rgba(107, 155, 209, 0.15);
+            border: 1px solid rgba(107, 155, 209, 0.3);
+            color: #6b9bd1;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 11px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .hashtag-pill:hover {
+            background: rgba(107, 155, 209, 0.25);
+            border-color: rgba(107, 155, 209, 0.5);
+        }
+
+        .idea-input {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 6px;
+            padding: 8px;
+            color: white;
+            font-size: 13px;
+            resize: none;
+            height: 40px;
+            font-family: 'Georgia', serif;
+        }
+
+        .idea-input:focus {
+            outline: none;
+            border-color: rgba(255, 255, 255, 0.4);
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .input-hint {
+            font-size: 9px;
+            color: rgba(255, 255, 255, 0.3);
+            margin-top: 4px;
+            margin-bottom: 8px;
+            font-style: italic;
+        }
+
+        .ideas-section-label {
+            font-size: 11px;
+            color: rgba(255, 255, 255, 0.5);
+            padding: 8px 15px 4px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: normal;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .ideas-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 10px 15px;
+            max-height: calc((100vh - 280px) / 2);
+        }
+
+        .ideas-list::-webkit-scrollbar {
+            width: 0px; /* Completely hidden */
+            display: none;
+        }
+
+        .ideas-list::-webkit-scrollbar-track {
+            background: transparent;
+            border: none;
+        }
+
+        .ideas-list::-webkit-scrollbar-thumb {
+            background: transparent;
+        }
+
+        /* For Firefox - also hide */
+        .ideas-list {
+            scrollbar-width: none;
+        }
+
+        .idea-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 10px;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+
+        .idea-card:hover {
+            background: rgba(255, 255, 255, 0.06);
+            border-color: rgba(255, 255, 255, 0.15);
+        }
+
+        .idea-card.editing {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+
+        .idea-text {
+            color: #e0e0e0;
+            line-height: 1.6;
+            font-size: 14px;
+            white-space: pre-wrap;
+            margin-bottom: 8px;
+        }
+
+        .idea-edit-input {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 6px;
+            padding: 10px;
+            color: white;
+            font-size: 14px;
+            resize: vertical;
+            min-height: 60px;
+            font-family: 'Georgia', serif;
+            margin-bottom: 8px;
+        }
+
+        .idea-edit-input:focus {
+            outline: none;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .idea-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 11px;
+            color: rgba(255, 255, 255, 0.3);
+        }
+
+        .idea-actions {
+            display: flex;
+            gap: 8px;
+            opacity: 0.5;
+            transition: opacity 0.2s;
+        }
+
+        .idea-card:hover .idea-actions {
+            opacity: 1;
+        }
+
+        .action-btn {
+            background: none;
+            border: none;
+            color: rgba(255, 255, 255, 0.5);
+            cursor: pointer;
+            font-size: 11px;
+            padding: 2px 6px;
+            transition: color 0.2s;
+        }
+
+        .action-btn:hover {
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        .empty-state {
+            text-align: center;
+            color: rgba(255, 255, 255, 0.3);
+            padding: 60px 20px;
+            font-style: italic;
+            font-size: 14px;
+        }
+
+        .hashtag {
+            color: #6b9bd1;
+            font-weight: normal;
+        }
+
+        /* PROJECTS PANEL */
+        .projects-panel {
+            position: fixed;
+            top: 0;
+            left: -300px;
+            width: 300px;
+            height: 100vh;
+            background: rgba(15, 15, 15, 0.98);
+            backdrop-filter: blur(20px);
+            z-index: 20;
+            transition: left 0.3s ease;
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .projects-panel.open {
+            left: 0;
+        }
+
+        .projects-header {
+            padding: 25px 20px 15px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .projects-header h2 {
+            font-size: 16px;
+            font-weight: normal;
+            margin-bottom: 12px;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .projects-actions {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+
+        .projects-actions button {
+            flex: 1;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: rgba(255, 255, 255, 0.7);
+            padding: 8px;
+            border-radius: 6px;
+            font-size: 11px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .projects-actions button:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+
+        .projects-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 10px 15px;
+        }
+
+        .projects-list::-webkit-scrollbar {
+            width: 0px;
+            display: none;
+        }
+
+        .projects-list {
+            scrollbar-width: none;
+        }
+
+        .project-item {
+            padding: 10px 12px;
+            margin-bottom: 4px;
+            border-radius: 6px;
+            cursor: default;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .project-item:active {
+            cursor: default;
+        }
+
+        .project-item:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .project-item.selected {
+            background: rgba(255, 255, 255, 0.1);
+            border-left: 2px solid rgba(255, 255, 255, 0.5);
+            padding-left: 10px;
+        }
+
+        .project-item.active {
+            color: rgba(255, 255, 255, 0.95);
+            font-weight: normal;
+        }
+
+        .project-item.active::before {
+            content: "●";
+            color: #6b9bd1;
+            margin-right: 4px;
+        }
+
+        .project-item.dragging {
+            opacity: 0.4;
+        }
+
+        .project-item.drag-over {
+            background: rgba(107, 155, 209, 0.2);
+            border: 1px solid rgba(107, 155, 209, 0.5);
+        }
+
+        .project-icon {
+            font-size: 10px;
+            width: 12px;
+            text-align: center;
+            opacity: 0.5;
+        }
+
+        .project-name {
+            flex: 1;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .project-indent-1 { padding-left: 28px; }
+        .project-indent-2 { padding-left: 44px; }
+        .project-indent-3 { padding-left: 60px; }
+
+        .projects-hint {
+            padding: 12px 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            font-size: 10px;
+            color: rgba(255, 255, 255, 0.3);
+            line-height: 1.6;
+        }
+
+        .projects-hint kbd {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: monospace;
+            font-size: 9px;
+        }
+
+        /* CUSTOM PROMPT MODAL */
+        .prompt-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 100;
+            display: none;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .prompt-modal.visible {
+            display: flex;
+        }
+
+        .prompt-modal-content {
+            background: rgba(20, 20, 20, 0.98);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            padding: 30px;
+            min-width: 400px;
+            backdrop-filter: blur(20px);
+        }
+
+        .prompt-modal-title {
+            font-size: 16px;
+            color: rgba(255, 255, 255, 0.9);
+            margin-bottom: 20px;
+            font-weight: normal;
+        }
+
+        .prompt-modal-input {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            padding: 12px;
+            color: white;
+            font-size: 14px;
+            font-family: 'Georgia', serif;
+            margin-bottom: 20px;
+        }
+
+        .prompt-modal-input:focus {
+            outline: none;
+            border-color: rgba(255, 255, 255, 0.4);
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .prompt-modal-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+
+        .prompt-modal-buttons button {
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 10px 20px;
+            border-radius: 8px;
+            color: rgba(255, 255, 255, 0.9);
+            cursor: pointer;
+            font-size: 13px;
+            transition: all 0.2s;
+        }
+
+        .prompt-modal-buttons button:hover {
+            background: rgba(255, 255, 255, 0.15);
+            border-color: rgba(255, 255, 255, 0.4);
+        }
+
+        .prompt-modal-buttons button.primary {
+            background: rgba(107, 155, 209, 0.2);
+            border-color: rgba(107, 155, 209, 0.4);
+            color: #6b9bd1;
+        }
+
+        .prompt-modal-buttons button.primary:hover {
+            background: rgba(107, 155, 209, 0.3);
+        }
+
+        /* FOLDER DROPDOWN IN MODAL */
+        .folder-select {
+            width: 70%; /* Narrower - not stealing focus */
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 6px;
+            padding: 8px 10px;
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 11px;
+            font-family: 'Georgia', serif;
+            margin-bottom: 12px;
+            cursor: pointer;
+            backdrop-filter: blur(10px);
+            appearance: none;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="10" height="6" viewBox="0 0 12 8"><path fill="rgba(255,255,255,0.4)" d="M1 1l5 5 5-5"/></svg>');
+            background-repeat: no-repeat;
+            background-position: right 10px center;
+            padding-right: 30px;
+        }
+
+        .folder-select:focus {
+            outline: none;
+            border-color: rgba(255, 255, 255, 0.25);
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+
+        .folder-select:hover {
+            background-color: rgba(255, 255, 255, 0.05);
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .folder-select option {
+            background: rgba(20, 20, 20, 0.98);
+            backdrop-filter: blur(20px);
+            color: rgba(255, 255, 255, 0.9);
+            padding: 10px;
+            border: none;
+        }
+
+        .folder-select option:hover,
+        .folder-select option:checked {
+            background: rgba(107, 155, 209, 0.2);
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-image" id="bgImage"></div>
+    <div class="overlay"></div>
+
+    <div class="editor-container">
+        <textarea id="editor" placeholder="Begin writing..." autofocus></textarea>
+    </div>
+
+    <div class="prompt-display" id="promptDisplay"></div>
+
+    <div class="word-count" id="wordCount">0 words</div>
+
+    <!-- SOUND INDICATOR -->
+    <div class="sound-indicator" id="soundIndicator">FX off</div>
+
+    <!-- PROJECT TITLE -->
+    <div class="project-title" id="projectTitle">Untitled</div>
+
+    <!-- FONT INDICATOR -->
+    <div class="font-indicator" id="fontIndicator">Georgia</div>
+
+    <!-- KEYBOARD SHORTCUTS REMINDER -->
+    <div class="shortcuts-hint">
+        ⌘K Ideas · Esc Esc Projects · ⌘\ History · ⌘P Prompt · ⌘B Background · ⌘E Export · ⌘/ Sound · ⌘S Save · ⌘F Fullscreen
+    </div>
+
+    <!-- PROJECTS PANEL -->
+    <div class="projects-panel" id="projectsPanel">
+        <div class="projects-header">
+            <h2>Projects</h2>
+            <input
+                type="text"
+                class="search-input"
+                id="projectsSearchInput"
+                placeholder="Search projects..."
+                style="margin-bottom: 12px;"
+            />
+            <div class="projects-actions">
+                <button onclick="createNewProject()"><kbd>N</kbd> New Project</button>
+                <button onclick="createNewFolder()"><kbd>F</kbd> New Folder</button>
+            </div>
+            <div class="projects-actions" style="margin-top: 10px;">
+                <button onclick="manualSave()" style="width: 100%;"><kbd>⌘S</kbd> Save Current</button>
+            </div>
+            <div class="projects-actions" style="margin-top: 10px;">
+                <button onclick="toggleHistory(); toggleProjects();" style="width: 100%;"><kbd>⌘\</kbd> History</button>
+            </div>
+        </div>
+        <div class="projects-list" id="projectsList">
+            <!-- Projects render here -->
+        </div>
+        <div class="projects-hint">
+            <kbd>↑</kbd> at top or <kbd>0</kbd> = Root · <kbd>→</kbd> Expand · <kbd>←</kbd> Collapse<br>
+            <kbd>Enter</kbd> Open · <kbd>R</kbd> Rename · <kbd>Del</kbd> Delete · <kbd>Esc</kbd> Close
+        </div>
+    </div>
+
+    <!-- HISTORY PANEL -->
+    <div class="projects-panel" id="historyPanel">
+        <div class="projects-header">
+            <h2>History</h2>
+            <input
+                type="text"
+                class="search-input"
+                id="historySearchInput"
+                placeholder="Search history..."
+                style="margin-bottom: 12px;"
+            />
+        </div>
+        <div class="projects-list" id="historyList">
+            <!-- History renders here -->
+        </div>
+        <div class="projects-hint">
+            <kbd>↑</kbd> <kbd>↓</kbd> Navigate · <kbd>Enter</kbd> Open · <kbd>Esc</kbd> Close
+        </div>
+    </div>
+
+    <div class="export-menu" id="exportMenu">
+        <h3>Export As...</h3>
+        <div class="export-option" onclick="exportAs('txt')">
+            <span class="export-option-label">Plain Text</span>
+            <span class="export-option-key">1</span>
+        </div>
+        <div class="export-option" onclick="exportAs('md')">
+            <span class="export-option-label">Markdown</span>
+            <span class="export-option-key">2</span>
+        </div>
+        <div class="export-option" onclick="exportAs('html')">
+            <span class="export-option-label">HTML Document</span>
+            <span class="export-option-key">3</span>
+        </div>
+        <div class="export-hint">Press number or click · Esc to cancel</div>
+    </div>
+
+    <div class="ideas-panel" id="ideasPanel">
+        <div class="ideas-header">
+            <h2>Ideas & Notes</h2>
+            
+            <!-- SEARCH -->
+            <input 
+                type="text" 
+                class="search-input" 
+                id="searchInput"
+                placeholder="Search ideas..." 
+            />
+            
+            <!-- HASHTAG LIBRARY -->
+            <div class="hashtag-library" id="hashtagLibrary" style="display: none;">
+                <div class="hashtag-library-label">Hashtags</div>
+                <div class="hashtag-pills" id="hashtagPills"></div>
+            </div>
+            
+            <!-- NEW IDEA INPUT -->
+            <textarea
+                class="idea-input"
+                id="ideaInput"
+                placeholder="Capture a thought... Use #hashtags"></textarea>
+            <div class="input-hint">Enter to save · Shift+Enter for line break · Esc to close</div>
+        </div>
+
+        <div class="ideas-section-label">Current Project</div>
+        <div class="ideas-list" id="ideasList">
+            <div class="empty-state">No ideas yet. Press ⌘K to start capturing.</div>
+        </div>
+
+        <div class="ideas-section-label">Recent Ideas</div>
+        <div class="ideas-list" id="globalIdeasList">
+            <div class="empty-state">No recent ideas.</div>
+        </div>
+    </div>
+
+    <!-- CUSTOM PROMPT MODAL -->
+    <div class="prompt-modal" id="promptModal">
+        <div class="prompt-modal-content">
+            <div class="prompt-modal-title" id="promptModalTitle">Enter name</div>
+            <select class="folder-select" id="folderSelect" style="display: none;">
+                <option value="">Root Level</option>
+            </select>
+            <input type="text" class="prompt-modal-input" id="promptModalInput" />
+            <div class="prompt-modal-buttons">
+                <button onclick="cancelPrompt()">Cancel</button>
+                <button class="primary" onclick="confirmPrompt()">Create</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const backgrounds = [
+            './images/photo1.jpg',
+            './images/photo2.jpg',
+            './images/photo3.jpg',
+            './images/photo4.jpg',
+            './images/photo5.jpg'
+        ];
+        
+        let currentBgIndex = 0;
+
+        const prompts = [
+            "Write about a place you've never been but dream about often.",
+            "Describe a sound that takes you back to childhood.",
+            "What would you tell your past self from exactly one year ago?",
+            "Write a letter to someone you've never met.",
+            "Describe the last time you felt completely at peace.",
+            "What does home smell like?",
+            "Write about a moment you wish you could relive.",
+            "Describe your perfect hour.",
+            "What are you avoiding by not starting?",
+            "Write about the last time you surprised yourself.",
+            "What do you think about writing?",
+            "Describe a dream you had recently.",
+            "What would be a chapter in your autobiography? What is the title? Write a brief arch or outline of what happened and why it's worthy of a chapter."
+        ];
+
+        const editor = document.getElementById('editor');
+        const editorContainer = document.querySelector('.editor-container');
+        const bgImage = document.getElementById('bgImage');
+        const wordCountEl = document.getElementById('wordCount');
+        const promptDisplay = document.getElementById('promptDisplay');
+        const ideasPanel = document.getElementById('ideasPanel');
+        const ideaInput = document.getElementById('ideaInput');
+        const searchInput = document.getElementById('searchInput');
+        const ideasList = document.getElementById('ideasList');
+        const globalIdeasList = document.getElementById('globalIdeasList');
+        const exportMenu = document.getElementById('exportMenu');
+        const hashtagLibrary = document.getElementById('hashtagLibrary');
+        const hashtagPills = document.getElementById('hashtagPills');
+        const projectsPanel = document.getElementById('projectsPanel');
+        const projectsList = document.getElementById('projectsList');
+        const historyPanel = document.getElementById('historyPanel');
+        const historyList = document.getElementById('historyList');
+        const projectsSearchInput = document.getElementById('projectsSearchInput');
+        const historySearchInput = document.getElementById('historySearchInput');
+        const promptModal = document.getElementById('promptModal');
+        const promptModalTitle = document.getElementById('promptModalTitle');
+        const promptModalInput = document.getElementById('promptModalInput');
+       const folderSelect = document.getElementById('folderSelect');
+
+let ideas = [];
+let editingId = null;
+let exportMenuOpen = false;
+let audioContext = null;
+let soundEnabled = false;
+let currentTextSize = 'medium';
+let masterGain = null;
+let currentFont = 'Georgia';
+
+const textSizes = {
+    small: 16,
+    medium: 20,
+    large: 24
+};
+
+const fonts = ['Georgia', 'Courier New', 'Times New Roman'];
+
+// PROJECTS SYSTEM
+let projects = [];
+let currentProjectId = null;
+let selectedProjectIndex = 0;
+let flatProjectList = [];
+let promptCallback = null;
+let draggedItem = null;
+let projectHistory = []; // Array of {projectId, timestamp, projectName}
+let historyPanelOpen = false;
+let selectedHistoryIndex = 0;
+
+function init() {
+    try {
+        console.log('=== INIT START ===');
+        
+        loadProjects();  // was: loadprojects (lowercase p)
+        console.log('After loadProjects, projects.length:', projects.length);  // was: lenghth
+        
+        if (projects.length === 0) {
+            console.log('No projects found, creating default');
+            initializeDefaultProject();  // was: createDefaultProject
+        } else {
+            console.log('Projects exist, skipping default creation');
+        }
+        
+        loadHistory();
+
+        if (!currentProjectId && projects.length > 0) {
+            // Try to load the last project from history
+            if (projectHistory.length > 0) {
+                const lastProjectId = projectHistory[0].projectId;
+                const lastProject = findProjectById(projects, lastProjectId);
+                if (lastProject) {
+                    currentProjectId = lastProjectId;
+                    console.log('Set current project to last worked on:', lastProject.name);
+                }
+            }
+
+            // Fallback to first project if no history
+            if (!currentProjectId) {
+                const firstProject = findFirstProject(projects);
+                if (firstProject) {
+                    currentProjectId = firstProject.id;
+                    console.log('Set current project to:', firstProject.name);
+                }
+            }
+        }
+
+        loadSavedText();
+        loadIdeas();
+        loadTextSize();
+        updateWordCount();
+        changeBackground();
+        updateHashtagLibrary();
+        renderIdeas();
+        renderGlobalIdeas();
+        renderProjects();
+        updateProjectTitle();
+        setupKeyboardShortcuts();
+        setupTypingSounds();
+        loadSoundPreference();
+        setupClickOutside();
+        setupSearchInputs();
+        
+        console.log('=== INIT COMPLETE ===');
+        console.log('Final projects:', projects);
+        console.log('Final currentProjectId:', currentProjectId);
+    } catch (e) {
+        console.error('Initialization error:', e);
+    }
+}
+        function setupClickOutside() {
+             document.addEventListener('click', function(e) {
+        if (projectsPanel.classList.contains('open')) {
+            if (!projectsPanel.contains(e.target)) {
+                toggleProjects();
+            }
+        }
+
+        if (historyPanel.classList.contains('open')) {
+            if (!historyPanel.contains(e.target)) {
+                toggleHistory();
+            }
+        }
+
+        if (ideasPanel.classList.contains('open')) {
+            if (!ideasPanel.contains(e.target)) {
+                toggleIdeas();
+            }
+        }
+
+        if (exportMenuOpen) {
+            if (!exportMenu.contains(e.target)) {
+                toggleExportMenu();
+            }
+        }
+    });
+}
+        function setupKeyboardShortcuts() {
+            // Double-escape tracking (declared locally to avoid scope issues)
+            let lastEscapeTime = 0;
+            const doubleEscapeThreshold = 500;
+            
+            document.addEventListener('keydown', function(e) {
+                const mod = e.metaKey || e.ctrlKey;
+
+                if (exportMenuOpen && !mod) {
+                    if (e.key >= '1' && e.key <= '3') {
+                        e.preventDefault();
+                        const formats = ['txt', 'md', 'html'];
+                        exportAs(formats[parseInt(e.key) - 1]);
+                        return;
+                    }
+                }
+
+                if (mod && e.key === 'k') {
+                    e.preventDefault();
+                    toggleIdeas();
+                }
+
+                if (mod && e.shiftKey && e.key === 'P') {
+                    e.preventDefault();
+                    console.log('⌘⇧P pressed - attempting to toggle projects');
+                    try {
+                        toggleProjects();
+                    } catch (err) {
+                        console.error('Failed to toggle projects:', err.message, err.stack);
+                        alert('Error opening projects: ' + err.message);
+                    }
+                }
+
+                if (mod && e.key === '\\') {
+                    e.preventDefault();
+                    toggleHistory();
+                }
+
+                if (mod && e.key === 'p' && !e.shiftKey) {
+                    e.preventDefault();
+                    showPrompt();
+                }
+
+                if (mod && e.key === 'b') {
+                    e.preventDefault();
+                    changeBackground();
+                }
+
+                if (mod && e.key === 'e') {
+                    e.preventDefault();
+                    toggleExportMenu();
+                }
+
+                if (mod && e.key === 's') {
+                    e.preventDefault();
+                    manualSave();
+                }
+
+                // Sound toggle - using ⌘/ (slash)
+                if (mod && e.key === '/') {
+                    e.preventDefault();
+                    toggleSound();
+                }
+
+                // Font cycle - using ⌘] (right bracket)
+                if (mod && e.key === ']') {
+                    e.preventDefault();
+                    cycleFont();
+                }
+
+                if (mod && e.key === 'f') {
+                    e.preventDefault();
+                    toggleFullscreen();
+                }
+
+                // Text size controls
+                if (mod && e.key === ',') {
+                    e.preventDefault();
+                    decreaseTextSize();
+                }
+
+                if (mod && e.key === '.') {
+                    e.preventDefault();
+                    increaseTextSize();
+                }
+
+                if (e.key === 'Escape') {
+                    // Check for double-tap FIRST
+                    const now = Date.now();
+                    const timeSinceLastEsc = now - lastEscapeTime;
+                    
+                    console.log('Escape pressed. Time since last:', timeSinceLastEsc + 'ms');
+                    
+                    if (timeSinceLastEsc < doubleEscapeThreshold && timeSinceLastEsc > 0) {
+                        // Double-tap detected!
+                        e.preventDefault();
+                        console.log('✓ Double-Esc detected - Toggle projects');
+                        lastEscapeTime = 0; // Reset to prevent triple-tap issues
+                        toggleProjects();
+                        return;
+                    }
+                    
+                    lastEscapeTime = now;
+                    
+                    // Single Escape - close whatever is open
+                    e.preventDefault();
+                    if (exportMenuOpen) {
+                        toggleExportMenu();
+                    } else if (ideasPanel.classList.contains('open')) {
+                        toggleIdeas();
+                    } else if (projectsPanel.classList.contains('open')) {
+                        toggleProjects();
+                    } else if (historyPanel.classList.contains('open')) {
+                        toggleHistory();
+                    }
+                }
+
+                // Projects panel keyboard navigation (only when modal is NOT open)
+                if (projectsPanel.classList.contains('open') && !promptModal.classList.contains('visible') && !mod) {
+                    handleProjectsKeyboard(e);
+                }
+
+                // History panel keyboard navigation
+                if (historyPanel.classList.contains('open') && !mod) {
+                    handleHistoryKeyboard(e);
+                }
+            });
+            
+            // Modal input handlers
+            promptModalInput.addEventListener('keydown', function(e) {
+                // Stop propagation so project shortcuts don't fire
+                e.stopPropagation();
+                
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    confirmPrompt();
+                } else if (e.key === 'Escape') {
+                    e.preventDefault();
+                    cancelPrompt();
+                } else if (e.key === 'ArrowUp') {
+                    e.preventDefault();
+                    // Move focus to folder dropdown if visible
+                    if (folderSelect.style.display !== 'none') {
+                        folderSelect.focus();
+                    }
+                }
+                // All other keys (including Delete) work normally in input
+            });
+            
+            // Folder select keyboard nav
+            folderSelect.addEventListener('keydown', function(e) {
+                e.stopPropagation();
+                
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    
+                    // If dropdown is closed, open it
+                    if (this.size <= 1) {
+                        this.size = Math.min(this.options.length, 8); // Show up to 8 options
+                        return;
+                    }
+                    
+                    // If dropdown is open, close it and return to text input
+                    this.size = 1;
+                    promptModalInput.focus();
+                    promptModalInput.setSelectionRange(promptModalInput.value.length, promptModalInput.value.length);
+                } else if (e.key === 'Escape') {
+                    e.preventDefault();
+                    // Close dropdown if open, otherwise cancel modal
+                    if (this.size > 1) {
+                        this.size = 1;
+                    } else {
+                        cancelPrompt();
+                    }
+                } else if (e.key === 'ArrowDown' && this.size <= 1) {
+                    e.preventDefault();
+                    // Open dropdown
+                    this.size = Math.min(this.options.length, 8);
+                }
+                // ArrowUp/ArrowDown when dropdown open = native navigation
+            });
+            
+            // Close dropdown when clicking outside
+            folderSelect.addEventListener('blur', function() {
+                setTimeout(() => {
+                    this.size = 1;
+                }, 100);
+            });
+        }
+
+        editor.addEventListener('input', function() {
+            saveCurrentProject(); // Save to current project
+            updateWordCount();
+        });
+
+        function setupTypingSounds() {
+            editor.addEventListener('keydown', function(e) {
+                if (!soundEnabled || e.metaKey || e.ctrlKey || e.altKey) return;
+
+                if (e.key === ' ') {
+                    playTypeSound('space');
+                } else if (e.key === 'Backspace') {
+                    playTypeSound('backspace');
+                } else if (e.key.length === 1) {
+                    playTypeSound('key');
+                }
+            }, { passive: true });
+        }
+
+        function initAudio() {
+            if (!audioContext) {
+                try {
+                    const AudioContext = window.AudioContext || window.webkitAudioContext;
+                    if (!AudioContext) {
+                        return;
+                    }
+
+                    // Request lowest latency possible
+                    audioContext = new AudioContext({
+                        latencyHint: 'interactive',
+                        sampleRate: 44100
+                    });
+
+                    if (audioContext.state === 'suspended') {
+                        audioContext.resume();
+                    }
+
+                    // Create master gain node
+                    masterGain = audioContext.createGain();
+                    masterGain.connect(audioContext.destination);
+                    masterGain.gain.value = 0.15;
+
+                } catch (e) {
+                    console.error('Audio init failed:', e);
+                }
+            }
+            return audioContext;
+        }
+
+        function playTypeSound(type = 'key') {
+            if (!soundEnabled || !audioContext || !masterGain) return;
+
+            const freq = type === 'space' ? 300 : type === 'backspace' ? 800 : 650;
+
+            const osc = audioContext.createOscillator();
+            const gain = audioContext.createGain();
+
+            osc.frequency.value = freq;
+            osc.connect(gain);
+            gain.connect(masterGain);
+
+            gain.gain.value = 1;
+            gain.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.015);
+
+            osc.start();
+            osc.stop(audioContext.currentTime + 0.015);
+        }
+
+        function toggleSound() {
+            soundEnabled = !soundEnabled;
+            const indicator = document.getElementById('soundIndicator');
+
+            if (soundEnabled) {
+                indicator.textContent = 'FX on';
+                indicator.classList.add('active');
+                const ctx = initAudio();
+                if (ctx && ctx.state === 'suspended') {
+                    ctx.resume().then(() => {
+                        playTypeSound('key');
+                    });
+                } else if (ctx) {
+                    playTypeSound('key');
+                }
+            } else {
+                indicator.textContent = 'FX off';
+                indicator.classList.remove('active');
+            }
+
+            localStorage.setItem('soundEnabled', soundEnabled);
+        }
+
+        function loadSoundPreference() {
+            const saved = localStorage.getItem('soundEnabled');
+            if (saved === 'true') {
+                soundEnabled = true;
+                const indicator = document.getElementById('soundIndicator');
+                indicator.textContent = 'FX on';
+                indicator.classList.add('active');
+            }
+        }
+
+        // === FONT SELECTION ===
+
+        function cycleFont() {
+            const currentIndex = fonts.indexOf(currentFont);
+            const nextIndex = (currentIndex + 1) % fonts.length;
+            currentFont = fonts[nextIndex];
+
+            applyFont();
+            saveFont();
+            showFontIndicator();
+        }
+
+        function applyFont() {
+            editor.style.fontFamily = `'${currentFont}', serif`;
+        }
+
+        function saveFont() {
+            const project = getCurrentProject();
+            if (project) {
+                project.font = currentFont;
+                saveProjects();
+            }
+        }
+
+        function loadFont() {
+            const project = getCurrentProject();
+            if (project && project.font) {
+                currentFont = project.font;
+            } else {
+                currentFont = 'Georgia'; // Default
+            }
+            applyFont();
+        }
+
+        function showFontIndicator() {
+            const indicator = document.getElementById('fontIndicator');
+            indicator.textContent = currentFont;
+            indicator.classList.add('visible');
+
+            setTimeout(() => {
+                indicator.classList.remove('visible');
+            }, 1500);
+        }
+
+        // === FULLSCREEN MODE ===
+
+        function toggleFullscreen() {
+            if (!document.fullscreenElement) {
+                // Enter fullscreen
+                document.documentElement.requestFullscreen().catch(err => {
+                    console.error('Fullscreen request failed:', err);
+                });
+            } else {
+                // Exit fullscreen
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                }
+            }
+        }
+
+        // Listen for fullscreen changes (user pressing Esc, etc)
+        document.addEventListener('fullscreenchange', function() {
+            if (document.fullscreenElement) {
+                console.log('Entered fullscreen mode');
+            } else {
+                console.log('Exited fullscreen mode');
+            }
+        });
+
+        // === TEXT SIZE CONTROLS ===
+        
+        function increaseTextSize() {
+            if (currentTextSize === 'small') {
+                currentTextSize = 'medium';
+            } else if (currentTextSize === 'medium') {
+                currentTextSize = 'large';
+            }
+            // Already at large, do nothing
+            applyTextSize();
+        }
+
+        function decreaseTextSize() {
+            if (currentTextSize === 'large') {
+                currentTextSize = 'medium';
+            } else if (currentTextSize === 'medium') {
+                currentTextSize = 'small';
+            }
+            // Already at small, do nothing
+            applyTextSize();
+        }
+
+        function applyTextSize() {
+            const size = textSizes[currentTextSize];
+            editor.style.fontSize = size + 'px';
+            localStorage.setItem('textSize', currentTextSize);
+        }
+
+        function loadTextSize() {
+            const saved = localStorage.getItem('textSize');
+            if (saved && textSizes[saved]) {
+                currentTextSize = saved;
+                applyTextSize();
+            }
+        }
+
+        // === CUSTOM PROMPT MODAL ===
+        
+        function showCustomPrompt(title, callback, showFolderSelect = false) {
+            promptModalTitle.textContent = title;
+            promptModalInput.value = '';
+            promptCallback = callback;
+            
+            // Show/hide folder dropdown
+            if (showFolderSelect) {
+                populateFolderSelect();
+                folderSelect.style.display = 'block';
+            } else {
+                folderSelect.style.display = 'none';
+            }
+            
+            promptModal.classList.add('visible');
+            setTimeout(() => promptModalInput.focus(), 100);
+        }
+
+        function populateFolderSelect() {
+            // Build list of all folders
+            const folders = [];
+            
+            function collectFolders(items, prefix = '') {
+                items.forEach(item => {
+                    if (item.type === 'folder') {
+                        folders.push({
+                            id: item.id,
+                            name: prefix + item.name
+                        });
+                        if (item.children) {
+                            collectFolders(item.children, prefix + item.name + ' / ');
+                        }
+                    }
+                });
+            }
+            
+            collectFolders(projects);
+            
+            // Populate dropdown
+            folderSelect.innerHTML = '<option value="">Root Level</option>';
+            folders.forEach(folder => {
+                folderSelect.innerHTML += `<option value="${folder.id}">${folder.name}</option>`;
+            });
+        }
+
+        function confirmPrompt() {
+            const value = promptModalInput.value.trim();
+            if (value && promptCallback) {
+                // Check if folder select is visible
+                if (folderSelect.style.display !== 'none') {
+                    const selectedFolderId = folderSelect.value;
+                    promptCallback(value, selectedFolderId);
+                } else {
+                    promptCallback(value);
+                }
+            }
+            promptModal.classList.remove('visible');
+            promptCallback = null;
+        }
+
+        function cancelPrompt() {
+            promptModal.classList.remove('visible');
+            promptCallback = null;
+        }
+
+        // === PROJECTS SYSTEM ===
+
+        function loadProjects() {
+            try {
+                const saved = localStorage.getItem('projects');
+                console.log('loadProjects - raw saved:', saved ? 'DATA EXISTS' : 'NO DATA');
+                
+                if (saved && saved !== 'undefined' && saved !== 'null') {
+                    const parsed = JSON.parse(saved);
+                    if (Array.isArray(parsed) && parsed.length > 0) {
+                        projects = parsed;
+                        console.log('✓ Loaded', projects.length, 'projects from storage');
+                    } else {
+                        console.log('⚠ Parsed data invalid, staying empty');
+                        projects = [];
+                    }
+                } else {
+                    projects = [];
+                    console.log('No saved projects');
+                }
+                
+                const savedCurrentId = localStorage.getItem('currentProjectId');
+                if (savedCurrentId && savedCurrentId !== 'null') {
+                    currentProjectId = parseInt(savedCurrentId);
+                    console.log('✓ Current project ID:', currentProjectId);
+                } else {
+                    currentProjectId = null;
+                    console.log('No current project ID');
+                }
+            } catch (e) {
+                console.error('❌ Error loading projects:', e.message);
+                projects = [];
+                currentProjectId = null;
+            }
+        }
+
+        function saveProjects() {
+            try {
+                localStorage.setItem('projects', JSON.stringify(projects));
+                localStorage.setItem('currentProjectId', currentProjectId);
+            } catch (e) {
+                console.error('Error saving projects:', e);
+            }
+        }
+
+        function initializeDefaultProject() {
+            // Create default project
+            const defaultProject = {
+                id: Date.now(),
+                name: 'Untitled',
+                type: 'project',
+                text: '',
+                ideas: [],
+                backgroundIndex: 0,
+                textSize: 'medium',
+                created: new Date().toISOString()
+            };
+            projects.push(defaultProject);
+            currentProjectId = defaultProject.id;
+            saveProjects();
+        }
+
+        function findFirstProject(items) {
+            for (let item of items) {
+                if (item.type === 'project') return item;
+                if (item.type === 'folder' && item.children) {
+                    const found = findFirstProject(item.children);
+                    if (found) return found;
+                }
+            }
+            return null;
+        }
+
+        function getCurrentProject() {
+            return findProjectById(projects, currentProjectId);
+        }
+
+        function findProjectById(items, id) {
+            for (let item of items) {
+                if (item.id === id) return item;
+                if (item.type === 'folder' && item.children) {
+                    const found = findProjectById(item.children, id);
+                    if (found) return found;
+                }
+            }
+            return null;
+        }
+
+        function saveCurrentProject() {
+            const project = getCurrentProject();
+            if (project) {
+                project.text = editor.value;
+                project.ideas = ideas;
+                project.backgroundIndex = currentBgIndex;
+                project.textSize = currentTextSize;
+                saveProjects();
+            }
+        }
+
+        function updateProjectTitle() {
+            const project = getCurrentProject();
+            const titleEl = document.getElementById('projectTitle');
+            if (titleEl && project) {
+                titleEl.textContent = project.name || 'Untitled';
+            }
+        }
+
+        function addToHistory(projectId) {
+            const project = findProjectById(projects, projectId);
+            if (!project) return;
+
+            // Remove existing entries for this project
+            projectHistory = projectHistory.filter(h => h.projectId !== projectId);
+
+            // Add to beginning of history
+            projectHistory.unshift({
+                projectId: projectId,
+                projectName: project.name,
+                timestamp: new Date().toISOString()
+            });
+
+            // Keep only last 100 entries
+            if (projectHistory.length > 100) {
+                projectHistory = projectHistory.slice(0, 100);
+            }
+
+            localStorage.setItem('projectHistory', JSON.stringify(projectHistory));
+        }
+
+        function loadHistory() {
+            try {
+                const saved = localStorage.getItem('projectHistory');
+                if (saved) {
+                    projectHistory = JSON.parse(saved);
+                }
+            } catch (e) {
+                console.error('Error loading history:', e);
+                projectHistory = [];
+            }
+        }
+
+        function loadProject(projectId) {
+            saveCurrentProject(); // Save current before switching
+
+            currentProjectId = projectId;
+            const project = getCurrentProject();
+
+            if (project) {
+                editor.value = project.text || '';
+                ideas = project.ideas || [];
+                currentBgIndex = project.backgroundIndex || 0;
+                currentTextSize = project.textSize || 'medium';
+
+                bgImage.style.backgroundImage = `url('${backgrounds[currentBgIndex]}')`;
+                applyTextSize();
+                updateWordCount();
+                updateHashtagLibrary();
+                renderIdeas();
+                renderGlobalIdeas();
+                renderProjects();
+                updateProjectTitle();
+                addToHistory(projectId);
+                saveProjects();
+            }
+        }
+
+        function createNewProject() {
+            showCustomPrompt('New Project', function(name) {
+                const newProject = {
+                    id: Date.now(),
+                    name: name,
+                    type: 'project',
+                    text: '',
+                    ideas: [],
+                    backgroundIndex: 0,
+                    textSize: 'medium',
+                    created: new Date().toISOString()
+                };
+                
+                // Check if we're inside a folder
+                if (selectedProjectIndex === -1 || flatProjectList.length === 0) {
+                    // Add to root
+                    projects.push(newProject);
+                } else {
+                    const selectedItem = flatProjectList[selectedProjectIndex]?.item;
+                    
+                    // If selected folder is collapsed, create at root instead
+                    if (selectedItem && selectedItem.type === 'folder' && selectedItem.expanded) {
+                        // Add to selected expanded folder
+                        if (!selectedItem.children) selectedItem.children = [];
+                        selectedItem.children.push(newProject);
+                    } else {
+                        // Folder is collapsed or selected item is a project, add to root
+                        projects.push(newProject);
+                    }
+                }
+                
+                saveProjects();
+                renderProjects();
+            });
+        }
+
+        function createNewFolder() {
+            showCustomPrompt('New Folder', function(name) {
+                const newFolder = {
+                    id: Date.now(),
+                    name: name,
+                    type: 'folder',
+                    expanded: true,
+                    children: [],
+                    created: new Date().toISOString()
+                };
+                
+                // Check if we're inside a folder
+                if (selectedProjectIndex === -1 || flatProjectList.length === 0) {
+                    // Add to root
+                    projects.push(newFolder);
+                } else {
+                    const selectedItem = flatProjectList[selectedProjectIndex]?.item;
+                    
+                    // If selected folder is collapsed, create at root instead
+                    if (selectedItem && selectedItem.type === 'folder' && selectedItem.expanded) {
+                        // Add folder inside selected expanded folder
+                        if (!selectedItem.children) selectedItem.children = [];
+                        selectedItem.children.push(newFolder);
+                    } else {
+                        // Folder is collapsed or selected item is a project, add to root
+                        projects.push(newFolder);
+                    }
+                }
+                
+                saveProjects();
+                renderProjects();
+            });
+        }
+
+        function deleteProject(id) {
+            if (!confirm('Delete this item? This cannot be undone.')) return;
+            
+            function removeById(items) {
+                for (let i = 0; i < items.length; i++) {
+                    if (items[i].id === id) {
+                        items.splice(i, 1);
+                        return true;
+                    }
+                    if (items[i].type === 'folder' && items[i].children) {
+                        if (removeById(items[i].children)) return true;
+                    }
+                }
+                return false;
+            }
+            
+            removeById(projects);
+            
+            if (currentProjectId === id) {
+                const firstProject = findFirstProject(projects);
+                if (firstProject) {
+                    loadProject(firstProject.id);
+                } else {
+                    initializeDefaultProject();
+                }
+            }
+            
+            saveProjects();
+            renderProjects();
+        }
+
+        function renameProject(id) {
+            const item = findProjectById(projects, id);
+            if (!item) return;
+
+            showCustomPrompt('Rename', function(newName) {
+                item.name = newName;
+                saveProjects();
+                renderProjects();
+                if (id === currentProjectId) {
+                    updateProjectTitle();
+                }
+            });
+            promptModalInput.value = item.name; // Pre-fill with current name
+        }
+
+        function toggleFolder(id) {
+            const folder = findProjectById(projects, id);
+            if (folder && folder.type === 'folder') {
+                folder.expanded = !folder.expanded;
+                saveProjects();
+                renderProjects();
+            }
+        }
+
+        function flattenProjects(items, depth = 0, result = []) {
+            for (let item of items) {
+                result.push({ item, depth });
+                if (item.type === 'folder' && item.expanded && item.children) {
+                    flattenProjects(item.children, depth + 1, result);
+                }
+            }
+            return result;
+        }
+        // === DRAG AND DROP HANDLERS ===
+        
+        function attachDragListeners() {
+            const items = projectsList.querySelectorAll('.project-item');
+            
+            items.forEach(item => {
+                item.addEventListener('dragstart', handleDragStart);
+                item.addEventListener('dragend', handleDragEnd);
+                item.addEventListener('dragover', handleDragOver);
+                item.addEventListener('dragleave', handleDragLeave);
+                item.addEventListener('drop', handleDrop);
+            });
+        }
+        
+        function handleDragStart(e) {
+            const id = parseInt(e.currentTarget.dataset.id);
+            draggedItem = findProjectById(projects, id);
+            e.currentTarget.classList.add('dragging');
+            e.dataTransfer.effectAllowed = 'move';
+        }
+        
+        function handleDragEnd(e) {
+            e.currentTarget.classList.remove('dragging');
+            document.querySelectorAll('.drag-over').forEach(el => {
+                el.classList.remove('drag-over');
+            });
+        }
+        
+        function handleDragOver(e) {
+            e.preventDefault();
+            e.dataTransfer.dropEffect = 'move';
+            
+            const targetElement = e.currentTarget;
+            if (!targetElement.classList.contains('dragging')) {
+                targetElement.classList.add('drag-over');
+            }
+        }
+        
+        function handleDragLeave(e) {
+            e.currentTarget.classList.remove('drag-over');
+        }
+        
+        function handleDrop(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            const targetId = parseInt(e.currentTarget.dataset.id);
+            const targetItem = findProjectById(projects, targetId);
+            
+            if (!draggedItem || !targetItem || draggedItem.id === targetId) {
+                return;
+            }
+            
+            removeItemFromProjects(draggedItem.id);
+            
+            if (targetItem.type === 'folder') {
+                if (!targetItem.children) targetItem.children = [];
+                targetItem.children.push(draggedItem);
+                targetItem.expanded = true;
+            } else {
+                const parent = findParentOfItem(projects, targetId);
+                const targetArray = parent ? parent.children : projects;
+                const targetIndex = targetArray.findIndex(item => item.id === targetId);
+                targetArray.splice(targetIndex + 1, 0, draggedItem);
+            }
+            
+            saveProjects();
+            renderProjects();
+            draggedItem = null;
+        }
+        
+        function removeItemFromProjects(id) {
+            function removeFromArray(items) {
+                for (let i = 0; i < items.length; i++) {
+                    if (items[i].id === id) {
+                        items.splice(i, 1);
+                        return true;
+                    }
+                    if (items[i].type === 'folder' && items[i].children) {
+                        if (removeFromArray(items[i].children)) return true;
+                    }
+                }
+                return false;
+            }
+            removeFromArray(projects);
+        }
+        
+        function findParentOfItem(items, childId, parent = null) {
+            for (let item of items) {
+                if (item.id === childId) {
+                    return parent;
+                }
+                if (item.type === 'folder' && item.children) {
+                    const found = findParentOfItem(item.children, childId, item);
+                    if (found !== null) return found;
+                }
+            }
+            return null;
+        }
+
+        function renderProjects() {
+            try {
+                const query = projectsSearchInput.value.toLowerCase().trim();
+                flatProjectList = flattenProjects(projects);
+
+                // Filter by search query
+                let filteredList = flatProjectList;
+                if (query) {
+                    filteredList = flatProjectList.filter(({ item }) => {
+                        // Search in project/folder name
+                        if (item.name.toLowerCase().includes(query)) return true;
+
+                        // Search in project text content (only for projects, not folders)
+                        if (item.type === 'project' && item.text && item.text.toLowerCase().includes(query)) return true;
+
+                        return false;
+                    });
+                }
+
+                if (filteredList.length === 0) {
+                    const message = query
+                        ? 'No matches found.'
+                        : 'No projects yet. Press N to create one!';
+                    projectsList.innerHTML = `<div class="empty-state">${message}</div>`;
+                    return;
+                }
+
+                projectsList.innerHTML = filteredList.map(({ item, depth }, index) => {
+                    const isActive = item.id === currentProjectId;
+                    const isSelected = index === selectedProjectIndex;
+                    const indentClass = depth > 0 ? `project-indent-${Math.min(depth, 3)}` : '';
+
+                    let icon = '';
+                    if (item.type === 'folder') {
+                        icon = item.expanded ? '▾' : '▸';
+                    } else {
+                        icon = '·';
+                    }
+
+                    return `
+                        <div class="project-item ${isActive ? 'active' : ''} ${isSelected ? 'selected' : ''} ${indentClass}"
+                             onclick="handleProjectClick(${item.id}, '${item.type}', event)"
+                             draggable="true"
+                             data-id="${item.id}"
+                             data-index="${index}">
+                            <span class="project-icon">${icon}</span>
+                            <span class="project-name">${escapeHtml(item.name)}</span>
+                        </div>
+                    `;
+                }).join('');
+
+                // Show "ROOT" indicator if nothing selected
+                if (selectedProjectIndex === -1 && !query) {
+                    projectsList.innerHTML = '<div style="padding: 10px 15px; color: rgba(255,255,255,0.5); font-size: 12px; font-style: italic;">→ Root level (press N or F to create here)</div>' + projectsList.innerHTML;
+                }
+             // Attach drag-and-drop event listeners after rendering
+                attachDragListeners();
+            } catch (e) {
+                console.error('Error rendering projects:', e);
+                projectsList.innerHTML = '<div class="empty-state">Error loading projects</div>';
+            }
+        }
+
+        function handleProjectClick(id, type) {
+            if (type === 'folder') {
+                toggleFolder(id);
+            } else {
+                loadProject(id);
+            }
+        }
+
+        function handleProjectsKeyboard(e) {
+            // Don't handle shortcuts if search input is focused
+            if (document.activeElement === projectsSearchInput) return;
+
+            // Allow N and F even when list is empty
+            if (e.key === 'n' || e.key === 'N') {
+                e.preventDefault();
+                console.log('N key pressed - creating project');
+                createNewProject();
+                return;
+            }
+
+            if (e.key === 'f' || e.key === 'F') {
+                e.preventDefault();
+                console.log('F key pressed - creating folder');
+                createNewFolder();
+                return;
+            }
+
+            // Other shortcuts require items to exist
+            if (flatProjectList.length === 0) return;
+
+            // Prevent if modal is open
+            if (promptModal.classList.contains('visible')) return;
+            
+            switch(e.key) {
+                case 'ArrowUp':
+                    e.preventDefault();
+                    if (selectedProjectIndex === 0) {
+                        // At top of list, go to root
+                        selectedProjectIndex = -1;
+                        console.log('↑ at top - deselected to root');
+                    } else if (selectedProjectIndex === -1) {
+                        // Already at root, wrap to bottom
+                        selectedProjectIndex = flatProjectList.length - 1;
+                    } else {
+                        selectedProjectIndex = Math.max(selectedProjectIndex - 1, 0);
+                    }
+                    renderProjects();
+                    scrollToSelected();
+                    break;
+                    
+                case 'ArrowDown':
+                    e.preventDefault();
+                    if (selectedProjectIndex === -1) {
+                        // At root, go to first item
+                        selectedProjectIndex = 0;
+                    } else if (selectedProjectIndex === flatProjectList.length - 1) {
+                        // At bottom, wrap to top
+                        selectedProjectIndex = 0;
+                    } else {
+                        selectedProjectIndex = selectedProjectIndex + 1;
+                    }
+                    renderProjects();
+                    scrollToSelected();
+                    break;
+                
+                case '0':
+                    e.preventDefault();
+                    selectedProjectIndex = -1; // Go to root
+                    renderProjects();
+                    console.log('0 pressed - deselected to root');
+                    break;
+                    
+                case 'ArrowRight':
+                    e.preventDefault();
+                    const rightItem = flatProjectList[selectedProjectIndex].item;
+                    if (rightItem.type === 'folder' && !rightItem.expanded) {
+                        toggleFolder(rightItem.id);
+                    }
+                    break;
+                    
+                case 'ArrowLeft':
+                    e.preventDefault();
+                    const leftItem = flatProjectList[selectedProjectIndex].item;
+                    if (leftItem.type === 'folder' && leftItem.expanded) {
+                        toggleFolder(leftItem.id);
+                    }
+                    break;
+                    
+                case 'Enter':
+                    e.preventDefault();
+                    const enterItem = flatProjectList[selectedProjectIndex].item;
+                    if (enterItem.type === 'project') {
+                        loadProject(enterItem.id);
+                        toggleProjects();
+                    } else {
+                        toggleFolder(enterItem.id);
+                    }
+                    break;
+                    
+                case 'r':
+                case 'R':
+                    e.preventDefault();
+                    const renameItem = flatProjectList[selectedProjectIndex].item;
+                    renameProject(renameItem.id);
+                    break;
+                    
+                case 'Delete':
+                case 'Backspace':
+                    e.preventDefault();
+                    const deleteItem = flatProjectList[selectedProjectIndex].item;
+                    deleteProject(deleteItem.id);
+                    break;
+            }
+        }
+
+        function scrollToSelected() {
+            const selected = projectsList.querySelector('.project-item.selected');
+            if (selected) {
+                selected.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+            }
+        }
+
+        function toggleProjects() {
+            console.log('toggleProjects called');
+            console.log('projectsPanel exists:', !!projectsPanel);
+            console.log('projects array:', projects);
+            console.log('currentProjectId:', currentProjectId);
+
+            // Close history if open
+            if (historyPanel.classList.contains('open')) {
+                historyPanel.classList.remove('open');
+            }
+
+            try {
+                const isOpen = projectsPanel.classList.toggle('open');
+                console.log('Panel toggled, isOpen:', isOpen);
+
+                if (isOpen) {
+                    console.log('Flattening projects...');
+                    flatProjectList = flattenProjects(projects);
+                    console.log('Flat list:', flatProjectList);
+
+                    selectedProjectIndex = flatProjectList.findIndex(({ item }) => item.id === currentProjectId);
+                    if (selectedProjectIndex === -1) selectedProjectIndex = 0;
+
+                    console.log('Selected index:', selectedProjectIndex);
+                    console.log('Rendering projects...');
+                    renderProjects();
+                    console.log('Projects rendered successfully');
+                }
+            } catch (e) {
+                console.error('Error in toggleProjects:', e.message);
+                console.error('Stack:', e.stack);
+                throw e;
+            }
+        }
+
+        function toggleHistory() {
+            // Close projects if open
+            if (projectsPanel.classList.contains('open')) {
+                projectsPanel.classList.remove('open');
+            }
+
+            const isOpen = historyPanel.classList.toggle('open');
+
+            if (isOpen) {
+                selectedHistoryIndex = 0;
+                renderHistory();
+                setTimeout(() => historySearchInput.focus(), 100);
+            }
+        }
+
+        function handleHistoryKeyboard(e) {
+            // Don't handle shortcuts if search input is focused
+            if (document.activeElement === historySearchInput) return;
+
+            const query = historySearchInput.value.toLowerCase().trim();
+            let filteredHistory = projectHistory;
+
+            if (query) {
+                filteredHistory = projectHistory.filter(historyItem => {
+                    const project = findProjectById(projects, historyItem.projectId);
+                    if (!project) return false;
+                    if (project.name.toLowerCase().includes(query)) return true;
+                    if (project.text && project.text.toLowerCase().includes(query)) return true;
+                    return false;
+                });
+            }
+
+            if (filteredHistory.length === 0) return;
+
+            switch(e.key) {
+                case 'ArrowUp':
+                    e.preventDefault();
+                    if (selectedHistoryIndex === 0) {
+                        selectedHistoryIndex = filteredHistory.length - 1;
+                    } else {
+                        selectedHistoryIndex = selectedHistoryIndex - 1;
+                    }
+                    renderHistory();
+                    scrollToSelectedHistory();
+                    break;
+
+                case 'ArrowDown':
+                    e.preventDefault();
+                    if (selectedHistoryIndex === filteredHistory.length - 1) {
+                        selectedHistoryIndex = 0;
+                    } else {
+                        selectedHistoryIndex = selectedHistoryIndex + 1;
+                    }
+                    renderHistory();
+                    scrollToSelectedHistory();
+                    break;
+
+                case 'Enter':
+                    e.preventDefault();
+                    const selectedItem = filteredHistory[selectedHistoryIndex];
+                    if (selectedItem) {
+                        loadProjectFromHistory(selectedItem.projectId);
+                    }
+                    break;
+            }
+        }
+
+        function scrollToSelectedHistory() {
+            const selected = historyList.querySelector('.project-item.selected');
+            if (selected) {
+                selected.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+            }
+        }
+
+        function renderHistory() {
+            const query = historySearchInput.value.toLowerCase().trim();
+
+            let filteredHistory = projectHistory;
+
+            // If there's a search query, search in project names and text content
+            if (query) {
+                filteredHistory = projectHistory.filter(historyItem => {
+                    const project = findProjectById(projects, historyItem.projectId);
+                    if (!project) return false;
+
+                    // Search in project name
+                    if (project.name.toLowerCase().includes(query)) return true;
+
+                    // Search in project text content
+                    if (project.text && project.text.toLowerCase().includes(query)) return true;
+
+                    return false;
+                });
+            }
+
+            if (filteredHistory.length === 0) {
+                const message = query
+                    ? 'No matches found.'
+                    : 'No history yet. Open some projects to build your history!';
+                historyList.innerHTML = `<div class="empty-state">${message}</div>`;
+                return;
+            }
+
+            historyList.innerHTML = filteredHistory.map((historyItem, index) => {
+                const project = findProjectById(projects, historyItem.projectId);
+                if (!project) return '';
+
+                const date = new Date(historyItem.timestamp);
+                const timeAgo = formatTimeAgo(date);
+                const isActive = historyItem.projectId === currentProjectId;
+                const isSelected = index === selectedHistoryIndex;
+
+                return `
+                    <div class="project-item ${isActive ? 'active' : ''} ${isSelected ? 'selected' : ''}"
+                         onclick="loadProjectFromHistory(${historyItem.projectId})"
+                         data-id="${historyItem.projectId}"
+                         data-index="${index}">
+                        <span class="project-icon">·</span>
+                        <div style="flex: 1;">
+                            <div class="project-name">${escapeHtml(project.name)}</div>
+                            <div style="font-size: 10px; color: rgba(255,255,255,0.3); margin-top: 2px;">${timeAgo}</div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function loadProjectFromHistory(projectId) {
+            loadProject(projectId);
+            toggleHistory();
+        }
+
+        function formatTimeAgo(date) {
+            const now = new Date();
+            const seconds = Math.floor((now - date) / 1000);
+            const minutes = Math.floor(seconds / 60);
+            const hours = Math.floor(minutes / 60);
+            const days = Math.floor(hours / 24);
+
+            if (days > 0) return `${days}d ago`;
+            if (hours > 0) return `${hours}h ago`;
+            if (minutes > 0) return `${minutes}m ago`;
+            return 'Just now';
+        }
+
+        function setupSearchInputs() {
+            projectsSearchInput.addEventListener('input', renderProjects);
+            historySearchInput.addEventListener('input', renderHistory);
+        }
+
+        // === MANUAL SAVE ===
+        
+        function manualSave() {
+            // If projects panel is open, just save current project
+            if (projectsPanel.classList.contains('open')) {
+                saveCurrentProject();
+
+                const saveBtn = document.querySelector('button[onclick="manualSave()"]');
+                if (saveBtn) {
+                    const originalText = saveBtn.innerHTML;
+                    saveBtn.innerHTML = 'Saved';
+                    saveBtn.style.background = 'rgba(255, 255, 255, 0.08)';
+                    setTimeout(() => {
+                        saveBtn.innerHTML = originalText;
+                        saveBtn.style.background = '';
+                    }, 1000);
+                }
+
+                console.log('Manual save - project saved');
+                return;
+            }
+
+            // If panel closed, check if project exists in directory
+            const currentProject = getCurrentProject();
+
+            // Check if current project exists (has been saved before)
+            if (currentProject && currentProject.name !== 'Untitled') {
+                // Project exists, just save it
+                saveCurrentProject();
+
+                // Show notification
+                const indicator = document.createElement('div');
+                indicator.style.cssText = `
+                    position: fixed;
+                    top: 20px;
+                    right: 20px;
+                    background: rgba(255, 255, 255, 0.05);
+                    border: 1px solid rgba(255, 255, 255, 0.15);
+                    color: rgba(255, 255, 255, 0.8);
+                    padding: 10px 16px;
+                    border-radius: 6px;
+                    font-size: 12px;
+                    z-index: 1000;
+                    backdrop-filter: blur(10px);
+                `;
+                indicator.textContent = 'Saved';
+                document.body.appendChild(indicator);
+
+                setTimeout(() => {
+                    indicator.style.opacity = '0';
+                    indicator.style.transition = 'opacity 0.3s';
+                    setTimeout(() => indicator.remove(), 300);
+                }, 1500);
+
+                console.log('Project saved:', currentProject.name);
+                return;
+            }
+
+            // Project doesn't exist or is Untitled, show "Save As" dialog
+            const suggestedName = currentProject ? currentProject.name : 'Untitled';
+
+            showCustomPrompt('Save Project As...', function(name, folderId) {
+                // Save current work first
+                saveCurrentProject();
+
+                // If it's a new name, create new project
+                if (name !== currentProject?.name) {
+                    const newProject = {
+                        id: Date.now(),
+                        name: name,
+                        type: 'project',
+                        text: editor.value,
+                        ideas: ideas,
+                        backgroundIndex: currentBgIndex,
+                        textSize: currentTextSize,
+                        created: new Date().toISOString()
+                    };
+
+                    // Add to selected folder or root
+                    if (folderId) {
+                        const folder = findProjectById(projects, parseInt(folderId));
+                        if (folder && folder.type === 'folder') {
+                            if (!folder.children) folder.children = [];
+                            folder.children.push(newProject);
+                            folder.expanded = true;
+                        }
+                    } else {
+                        projects.push(newProject);
+                    }
+
+                    saveProjects();
+                    currentProjectId = newProject.id;
+                }
+
+                // Show confirmation
+                const indicator = document.createElement('div');
+                indicator.style.cssText = `
+                    position: fixed;
+                    top: 20px;
+                    right: 20px;
+                    background: rgba(255, 255, 255, 0.05);
+                    border: 1px solid rgba(255, 255, 255, 0.15);
+                    color: rgba(255, 255, 255, 0.8);
+                    padding: 10px 16px;
+                    border-radius: 6px;
+                    font-size: 12px;
+                    z-index: 1000;
+                    backdrop-filter: blur(10px);
+                `;
+                indicator.textContent = 'Saved as "' + name + '"';
+                document.body.appendChild(indicator);
+
+                setTimeout(() => {
+                    indicator.style.opacity = '0';
+                    indicator.style.transition = 'opacity 0.3s';
+                    setTimeout(() => indicator.remove(), 300);
+                }, 2000);
+
+                // DON'T open projects panel - keep focus on writing
+                console.log('Saved as:', name);
+            }, true); // true = show folder select
+
+            // Pre-fill with current project name
+            setTimeout(() => {
+                promptModalInput.value = suggestedName;
+                promptModalInput.select(); // Highlight for easy overwrite
+            }, 150);
+        }
+
+        // === DRAG AND DROP ===
+
+        function handleProjectClick(id, type, event) {
+            try {
+                if (event) {
+                    event.stopPropagation(); // Prevent click from bubbling to document
+                }
+                if (type === 'folder') {
+                    toggleFolder(id);
+                } else {
+                    loadProject(id);
+                }
+            } catch (e) {
+                console.error('Error handling project click:', e);
+            }
+        }
+
+        function updateWordCount() {
+            const text = editor.value.trim();
+            const words = text ? text.split(/\s+/).length : 0;
+            wordCountEl.textContent = `${words} word${words !== 1 ? 's' : ''}`;
+        }
+
+        function loadSavedText() {
+            const project = getCurrentProject();
+            if (project) {
+                editor.value = project.text || '';
+                updateWordCount();
+            }
+        }
+
+        function changeBackground() {
+            currentBgIndex = (currentBgIndex + 1) % backgrounds.length;
+            bgImage.style.backgroundImage = `url('${backgrounds[currentBgIndex]}')`;
+        }
+
+        function showPrompt() {
+            const randomPrompt = prompts[Math.floor(Math.random() * prompts.length)];
+            promptDisplay.textContent = randomPrompt;
+            promptDisplay.classList.add('visible');
+            
+            setTimeout(() => {
+                promptDisplay.classList.remove('visible');
+            }, 5000);
+        }
+
+        function toggleExportMenu() {
+            exportMenuOpen = !exportMenuOpen;
+            exportMenu.classList.toggle('visible');
+        }
+
+        function exportAs(format) {
+            const text = editor.value;
+            const filename = `writing-${new Date().toISOString().split('T')[0]}`;
+            
+            toggleExportMenu();
+
+            switch(format) {
+                case 'txt':
+                    exportTXT(text, filename);
+                    break;
+                case 'md':
+                    exportMarkdown(text, filename);
+                    break;
+                case 'html':
+                    exportHTML(text, filename);
+                    break;
+            }
+        }
+
+        function exportTXT(text, filename) {
+            const blob = new Blob([text], { type: 'text/plain' });
+            downloadBlob(blob, `${filename}.txt`);
+        }
+
+        function exportMarkdown(text, filename) {
+            const blob = new Blob([text], { type: 'text/markdown' });
+            downloadBlob(blob, `${filename}.md`);
+        }
+
+        function exportHTML(text, filename) {
+            const paragraphs = text.split('\n\n').map(para => 
+                `<p>${para.replace(/\n/g, '<br>')}</p>`
+            ).join('');
+
+            const html = `<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>${filename}</title>
+    <style>
+        body {
+            font-family: Georgia, serif;
+            max-width: 800px;
+            margin: 60px auto;
+            padding: 0 20px;
+            line-height: 1.8;
+            color: #333;
+        }
+        p {
+            margin-bottom: 1.5em;
+        }
+    </style>
+</head>
+<body>
+${paragraphs}
+</body>
+</html>`;
+            
+            const blob = new Blob([html], { type: 'text/html' });
+            downloadBlob(blob, `${filename}.html`);
+        }
+
+        function downloadBlob(blob, filename) {
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        function toggleIdeas() {
+            const isOpen = ideasPanel.classList.toggle('open');
+            editorContainer.classList.toggle('shifted', isOpen); // Shift editor when panel opens
+
+            if (isOpen) {
+                renderGlobalIdeas();
+                setTimeout(() => ideaInput.focus(), 300);
+            } else {
+                editor.focus();
+            }
+        }
+
+        function loadIdeas() {
+            const project = getCurrentProject();
+            if (project) {
+                ideas = project.ideas || [];
+            }
+        }
+
+        function saveIdeas() {
+            saveCurrentProject(); // Save entire project
+        }
+
+        function addIdea() {
+            const text = ideaInput.value.trim();
+            if (!text) return;
+
+            const idea = {
+                id: Date.now(),
+                text: text,
+                timestamp: new Date().toLocaleString()
+            };
+
+            ideas.unshift(idea);
+            saveIdeas();
+            updateHashtagLibrary(); // Update hashtag list
+            renderIdeas();
+            renderGlobalIdeas();
+            ideaInput.value = '';
+        }
+
+        function deleteIdea(id) {
+            if (confirm('Delete this idea?')) {
+                ideas = ideas.filter(idea => idea.id !== id);
+                saveIdeas();
+                renderIdeas();
+                renderGlobalIdeas();
+            }
+        }
+
+        function startEdit(id) {
+            editingId = id;
+            renderIdeas();
+        }
+
+        function saveEdit(id, newText) {
+            const idea = ideas.find(i => i.id === id);
+            if (idea) {
+                idea.text = newText.trim();
+                saveIdeas();
+            }
+            editingId = null;
+            updateHashtagLibrary(); // Refresh hashtags after edit
+            renderIdeas();
+            renderGlobalIdeas();
+        }
+
+        function cancelEdit() {
+            editingId = null;
+            renderIdeas();
+        }
+
+        // === HASHTAG LIBRARY ===
+        
+        function extractHashtags(text) {
+            // Find all words starting with # (alphanumeric only)
+            const matches = text.match(/#\w+/g);
+            return matches ? matches.map(tag => tag.toLowerCase()) : [];
+        }
+
+        function getAllHashtags() {
+            // Collect all unique hashtags from all ideas
+            const allTags = new Set();
+            ideas.forEach(idea => {
+                extractHashtags(idea.text).forEach(tag => allTags.add(tag));
+            });
+            return Array.from(allTags).sort();
+        }
+
+        function updateHashtagLibrary() {
+            const tags = getAllHashtags();
+            
+            if (tags.length === 0) {
+                hashtagLibrary.style.display = 'none';
+                return;
+            }
+            
+            hashtagLibrary.style.display = 'block';
+            hashtagPills.innerHTML = tags.map(tag => 
+                `<span class="hashtag-pill" onclick="filterByHashtag('${tag}')">${tag}</span>`
+            ).join('');
+        }
+
+        function filterByHashtag(tag) {
+            searchInput.value = tag;
+            renderIdeas();
+            renderGlobalIdeas();
+        }
+
+        searchInput.addEventListener('input', function() {
+            renderIdeas();
+            renderGlobalIdeas();
+        });
+
+        function filterIdeas() {
+            const query = searchInput.value.toLowerCase().trim();
+            if (!query) return ideas;
+            return ideas.filter(idea => idea.text.toLowerCase().includes(query));
+        }
+
+        function renderIdeas() {
+            const filteredIdeas = filterIdeas();
+
+            if (filteredIdeas.length === 0) {
+                const message = searchInput.value.trim() 
+                    ? 'No ideas match your search.'
+                    : 'No ideas yet. Press ⌘K to start capturing.';
+                ideasList.innerHTML = `<div class="empty-state">${message}</div>`;
+                return;
+            }
+
+            ideasList.innerHTML = filteredIdeas.map(idea => {
+                const isEditing = idea.id === editingId;
+                
+                if (isEditing) {
+                    return `
+                        <div class="idea-card editing">
+                            <textarea class="idea-edit-input" id="edit-${idea.id}">${escapeHtml(idea.text)}</textarea>
+                            <div class="idea-meta">
+                                <span>${idea.timestamp}</span>
+                                <div class="idea-actions">
+                                    <button class="action-btn" onclick="saveEdit(${idea.id}, document.getElementById('edit-${idea.id}').value)">Save</button>
+                                    <button class="action-btn" onclick="cancelEdit()">Cancel</button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    const highlightedText = highlightHashtags(idea.text);
+                    return `
+                        <div class="idea-card" onclick="startEdit(${idea.id})">
+                            <div class="idea-text">${highlightedText}</div>
+                            <div class="idea-meta">
+                                <span>${idea.timestamp}</span>
+                                <div class="idea-actions">
+                                    <button class="action-btn" onclick="event.stopPropagation(); deleteIdea(${idea.id})">Delete</button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }
+            }).join('');
+
+            if (editingId) {
+                setTimeout(() => {
+                    const editInput = document.getElementById(`edit-${editingId}`);
+                    if (editInput) {
+                        editInput.focus();
+                        editInput.setSelectionRange(editInput.value.length, editInput.value.length);
+                    }
+                }, 0);
+            }
+        }
+
+        function highlightHashtags(text) {
+            return escapeHtml(text).replace(/#(\w+)/g, '<span class="hashtag">#$1</span>');
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function renderGlobalIdeas() {
+            const query = searchInput.value.toLowerCase().trim();
+            const currentProject = getCurrentProject();
+
+            // Get all ideas from relevant projects
+            let allIdeas = [];
+
+            // Determine which projects to include
+            if (currentProject) {
+                const parentFolder = findParentOfItem(projects, currentProject.id);
+
+                if (parentFolder) {
+                    // Project is in a folder - show ideas from all projects in that folder
+                    function collectIdeasFromFolder(folder) {
+                        folder.children.forEach(item => {
+                            if (item.type === 'project' && item.id !== currentProjectId && item.ideas) {
+                                item.ideas.forEach(idea => {
+                                    allIdeas.push({
+                                        ...idea,
+                                        projectName: item.name,
+                                        projectId: item.id
+                                    });
+                                });
+                            } else if (item.type === 'folder' && item.children) {
+                                collectIdeasFromFolder(item);
+                            }
+                        });
+                    }
+                    collectIdeasFromFolder(parentFolder);
+                } else {
+                    // Project is at root - show ideas from all projects
+                    function collectAllIdeas(items) {
+                        items.forEach(item => {
+                            if (item.type === 'project' && item.id !== currentProjectId && item.ideas) {
+                                item.ideas.forEach(idea => {
+                                    allIdeas.push({
+                                        ...idea,
+                                        projectName: item.name,
+                                        projectId: item.id
+                                    });
+                                });
+                            } else if (item.type === 'folder' && item.children) {
+                                collectAllIdeas(item.children);
+                            }
+                        });
+                    }
+                    collectAllIdeas(projects);
+                }
+            }
+
+            // Sort by timestamp (most recent first)
+            allIdeas.sort((a, b) => b.id - a.id);
+
+            // Filter by search query
+            if (query) {
+                allIdeas = allIdeas.filter(idea => idea.text.toLowerCase().includes(query));
+            }
+
+            if (allIdeas.length === 0) {
+                const message = query ? 'No matches found.' : 'No recent ideas from other projects.';
+                globalIdeasList.innerHTML = `<div class="empty-state">${message}</div>`;
+                return;
+            }
+
+            globalIdeasList.innerHTML = allIdeas.map(idea => {
+                const highlightedText = highlightHashtags(idea.text);
+                return `
+                    <div class="idea-card" onclick="loadProject(${idea.projectId}); toggleIdeas();">
+                        <div class="idea-text">${highlightedText}</div>
+                        <div class="idea-meta">
+                            <span>${idea.projectName}</span>
+                            <span style="margin-left: 10px; opacity: 0.6;">${idea.timestamp}</span>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        ideaInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                addIdea();
+            }
+            // Shift+Enter allows line break (default behavior)
+        });
+
+        ideasList.addEventListener('keydown', function(e) {
+            if (editingId) {
+                if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
+                    e.preventDefault();
+                    const editInput = document.getElementById(`edit-${editingId}`);
+                    if (editInput) {
+                        saveEdit(editingId, editInput.value);
+                    }
+                }
+                if (e.key === 'Escape') {
+                    e.preventDefault();
+                    cancelEdit();
+                }
+            }
+        });
+
+        init();
+    </script>
+</body>
+</html>
