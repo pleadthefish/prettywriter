@@ -1647,11 +1647,13 @@ function init() {
                               U S E R   M A N U A L
 ═══════════════════════════════════════════════════════════════════════════════
 
-Welcome to PrettyWriter, a distraction-free writing environment inspired by composing on analog typewriters and removing barriers between your creative ideas being written down.
+Welcome to PrettyWriter, a distraction-free writing environment inspired by composing on analog typewriters. Typewriters are fun, tactile, and wholly focused. They make you want to use them and they hold you in the creative writing space. A digital approximation of that phenomenon is the goal of PrettyWriter.
 
-With a typewriter it's just you, the machine, and the page. With its array of keyboard shortcuts, PrettyWriter is designed to keep your fingers on the keys and the words flowing. You'll notice that the Projects panel and the Ideas & Notes panel can only be opened with keyboard shortcuts. You're not writing if you're mousing about!
+With its array of keyboard shortcuts, PrettyWriter is designed to keep your fingers on the keys and the words flowing. You'll find that several functions can only be accomplished with keyboard shortcuts. You're not writing if you're mousing about!
 
-Like a typewriter, there is minimal text formatting available. Don't worry about it, just start writing. The first draft is NEVER the best draft, but the most important one. You can't go anywhere without a first draft.
+Like a typewriter, there is minimal text formatting available. Don't worry about it, just start writing. The first draft is NEVER the best draft, but it is the most important one. You can't go anywhere without a first draft!
+
+Typewriters are beautiful machines. At one time they were everyday function-driven tools, but now they are a class example of analog design and ingenuity. PrettyWriter utilizes curated original photography to evoke that sense that you're writing on a work of art. Creativity begets creativity. 
 
 ═══════════════════════════════════════════════════════════════════════════════
 KEYBOARD SHORTCUTS
@@ -1670,7 +1672,7 @@ WRITING ENVIRONMENT
     ⌘P          Show random writing prompt
     ⌘F          Toggle fullscreen
     ⌘/          Toggle typing sound effects (FX)
-    fn↑/↓       Page Up / Page Down (browser shorcut)
+    fn↑/↓       Page Up / Page Down (browser shortcut)
 
 TEXT CONTROLS
     ⌘]          Next font
@@ -1782,10 +1784,10 @@ You're all set. Double-tap Esc to open the Projects Panel and Press N to open yo
 ═══════════════════════════════════════════════════════════════════════════════`;
 
         function ensureManualProject() {
-            // Find existing manual project
-            const manual = projects.find(p => p.id === 1 && p.type === 'project');
+            // Check if manual project exists
+            const manualExists = projects.some(p => p.id === 1 && p.type === 'project');
 
-            if (!manual) {
+            if (!manualExists) {
                 // Create manual project with fixed ID = 1
                 const manualProject = {
                     id: 1,
@@ -1803,13 +1805,6 @@ You're all set. Double-tap Esc to open the Projects Panel and Press N to open yo
                 // Add to beginning of projects array
                 projects.unshift(manualProject);
                 console.log('✓ Created manual project');
-                saveProjects();
-            } else {
-                // Update existing manual with latest text and name
-                manual.text = MANUAL_TEXT;
-                manual.name = 'User Manual';
-                manual.pinned = true;
-                console.log('✓ Updated manual project');
                 saveProjects();
             }
         }
@@ -2427,12 +2422,7 @@ You're all set. Double-tap Esc to open the Projects Panel and Press N to open yo
         }
 
         function handleHistoryKeyboard(e) {
-            // Blur search input on arrow keys to enable navigation
-            if (document.activeElement === historySearchInput && (e.key === 'ArrowUp' || e.key === 'ArrowDown')) {
-                historySearchInput.blur();
-            }
-
-            // Don't handle other shortcuts if search input is focused
+            // Don't handle shortcuts if search input is focused
             if (document.activeElement === historySearchInput) return;
 
             const query = historySearchInput.value.toLowerCase().trim();
