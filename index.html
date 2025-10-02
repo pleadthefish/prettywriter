@@ -1025,36 +1025,44 @@ let selectedHistoryIndex = 0;
 function init() {
     try {
         console.log('=== INIT START ===');
-        
+
+        const isFirstTime = !localStorage.getItem('hasVisited');
+
         loadProjects();  // was: loadprojects (lowercase p)
         console.log('After loadProjects, projects.length:', projects.length);  // was: lenghth
-        
-        if (projects.length === 0) {
-            console.log('No projects found, creating default');
-            initializeDefaultProject();  // was: createDefaultProject
-        } else {
-            console.log('Projects exist, skipping default creation');
+
+        if (projects.length === 1 && projects[0].id === 1) {
+            // Only manual exists, this is a brand new user
+            console.log('First time user - will open manual');
+            initializeDefaultProject();
         }
-        
+
         loadHistory();
 
         if (!currentProjectId && projects.length > 0) {
-            // Try to load the last project from history
-            if (projectHistory.length > 0) {
-                const lastProjectId = projectHistory[0].projectId;
-                const lastProject = findProjectById(projects, lastProjectId);
-                if (lastProject) {
-                    currentProjectId = lastProjectId;
-                    console.log('Set current project to last worked on:', lastProject.name);
+            if (isFirstTime) {
+                // First time user: open the manual
+                currentProjectId = 1;
+                localStorage.setItem('hasVisited', 'true');
+                console.log('First time user - opening manual');
+            } else {
+                // Returning user: load last project from history
+                if (projectHistory.length > 0) {
+                    const lastProjectId = projectHistory[0].projectId;
+                    const lastProject = findProjectById(projects, lastProjectId);
+                    if (lastProject) {
+                        currentProjectId = lastProjectId;
+                        console.log('Set current project to last worked on:', lastProject.name);
+                    }
                 }
-            }
 
-            // Fallback to first project if no history
-            if (!currentProjectId) {
-                const firstProject = findFirstProject(projects);
-                if (firstProject) {
-                    currentProjectId = firstProject.id;
-                    console.log('Set current project to:', firstProject.name);
+                // Fallback to first non-manual project if no history
+                if (!currentProjectId) {
+                    const firstProject = projects.find(p => p.id !== 1 && p.type === 'project') || findFirstProject(projects);
+                    if (firstProject) {
+                        currentProjectId = firstProject.id;
+                        console.log('Set current project to:', firstProject.name);
+                    }
                 }
             }
         }
@@ -1592,7 +1600,7 @@ function init() {
             try {
                 const saved = localStorage.getItem('projects');
                 console.log('loadProjects - raw saved:', saved ? 'DATA EXISTS' : 'NO DATA');
-                
+
                 if (saved && saved !== 'undefined' && saved !== 'null') {
                     const parsed = JSON.parse(saved);
                     if (Array.isArray(parsed) && parsed.length > 0) {
@@ -1606,7 +1614,10 @@ function init() {
                     projects = [];
                     console.log('No saved projects');
                 }
-                
+
+                // Ensure manual project exists
+                ensureManualProject();
+
                 const savedCurrentId = localStorage.getItem('currentProjectId');
                 if (savedCurrentId && savedCurrentId !== 'null') {
                     currentProjectId = parseInt(savedCurrentId);
@@ -1628,6 +1639,170 @@ function init() {
                 localStorage.setItem('currentProjectId', currentProjectId);
             } catch (e) {
                 console.error('Error saving projects:', e);
+            }
+        }
+
+        const MANUAL_TEXT = `═══════════════════════════════════════════════════════════════════════════════
+                           P R E T T Y W R I T E R
+                              U S E R   M A N U A L
+═══════════════════════════════════════════════════════════════════════════════
+
+Welcome to PrettyWriter, a distraction-free writing environment inspired by composing on analog typewriters and removing barriers between your creative ideas being written down.
+
+With a typewriter it's just you, the machine, and the page. With its array of keyboard shortcuts, PrettyWriter is designed to keep your fingers on the keys and the words flowing. You'll notice that the Projects panel and the Ideas & Notes panel can only be opened with keyboard shortcuts. You're not writing if you're mousing about!
+
+Like a typewriter, there is minimal text formatting available. Don't worry about it, just start writing. The first draft is NEVER the best draft, but the most important one. You can't go anywhere without a first draft.
+
+═══════════════════════════════════════════════════════════════════════════════
+KEYBOARD SHORTCUTS
+═══════════════════════════════════════════════════════════════════════════════
+
+ESSENTIAL COMMANDS
+    ⌘S          Save current project
+    ⌘K          Toggle Ideas panel
+    Esc Esc     Toggle Projects panel (double-tap Escape)
+    ⌘\\          Toggle History panel
+    ⌘E          Export menu
+    ⌘F          Fullscreen (browser shortcut)
+
+WRITING ENVIRONMENT
+    ⌘B          Change background image
+    ⌘P          Show random writing prompt
+    ⌘F          Toggle fullscreen
+    ⌘/          Toggle typing sound effects (FX)
+
+TEXT CONTROLS
+    ⌘]          Next font
+    ⌘[          Previous font
+    ⌘.          Increase text size
+    ⌘,          Decrease text size
+
+
+═══════════════════════════════════════════════════════════════════════════════
+PROJECTS PANEL (Esc Esc)
+═══════════════════════════════════════════════════════════════════════════════
+
+The Projects panel is a basic file and document saving structure to organize all your writing into separate projects and folders. Each project saves its own text, ideas and notes, background, and font settings.
+
+BASIC USAGE
+    N           Create new project
+    F           Create new folder
+    Enter       Open selected project
+    R           Rename project/folder
+    Delete      Delete project/folder
+    Up/Down Arrows  Navigate list
+    Left/Right Arrows Collapse/open folder
+    0           Jump to root level
+
+HOW SAVING WORKS
+    • Your text saves automatically as you type
+    • ⌘S (panel closed): First time creates a new project with a name
+    • ⌘S (panel open): Immediately saves to current project
+    • Each project remembers: text, ideas & notes, background, font, and text size
+
+HISTORY PANEL
+──────────────────────────────
+Functions like a browser history, time stamping your project history and saving it in order. Use it to quickly return to previous projects, if you find the workflow useful.
+    • ⌘\\         Open History panel
+
+
+═══════════════════════════════════════════════════════════════════════════════
+IDEAS & NOTES PANEL (⌘K)
+═══════════════════════════════════════════════════════════════════════════════
+
+A scratchpad for capturing thoughts, notes, and ideas as you write with minimal disruption to your flow. PrettyWriter promotes networked thinking to tap creativity.
+
+BASIC USAGE
+    • Type an idea in the input box
+    • Enter: Save idea
+    • Shift+Enter: Line break within input box (multi-line ideas)
+    • Click any idea to edit it
+    • Ideas save to the current project automatically
+
+HASHTAGS
+    • Use #hashtags anywhere in your ideas (e.g., "research scene #chapter3")
+    • All hashtags appear as clickable pills above the input
+    • Click a hashtag to filter ideas
+
+TWO LISTS
+    1. CURRENT PROJECT — Ideas for the project you're working on
+    2. RECENT IDEAS — Ideas from other projects (click to jump to that project)
+
+
+═══════════════════════════════════════════════════════════════════════════════
+EXPORT (⌘E)
+═══════════════════════════════════════════════════════════════════════════════
+
+Save your writing to your computer in different formats:
+    1  Plain text (.txt)
+    2  Markdown (.md)
+    3  HTML document (.html)
+
+Files download with today's date automatically.
+
+Note: As of right now, PrettyWriter utilizes local browser storage, not cloud storage. If you clear your browser cache you'll lose your work. Exporting is an important backup measure.
+═══════════════════════════════════════════════════════════════════════════════
+FOR TESTERS
+═══════════════════════════════════════════════════════════════════════════════
+Let me know what you liked, what you didn't like! This is a fluid development. An idea coming to life in real time.
+
+YOUR DATA
+    • Everything saves to your browser's local storage
+    • Data persists between sessions on this device/browser only
+    • NOT synced between devices or browsers
+    • Clearing browser data will erase all projects
+
+KNOWN LIMITATIONS (EARLY VERSION)
+    • No cloud sync or backup yet
+    • No undo/redo (use ⌘Z for browser undo)
+    • Custom fonts may not load if font files are missing
+    • Background images need to be in the ./images/ folder
+    • Bugs, surely. Bear with me.
+
+REPORTING ISSUES
+When something breaks, please note:
+    • What you were doing when it happened
+    • Which keyboard shortcut or button you pressed
+    • Whether the browser console shows errors (F12 → Console tab)
+
+═══════════════════════════════════════════════════════════════════════════════
+TIPS FOR FOCUSED WRITING
+═══════════════════════════════════════════════════════════════════════════════
+
+    1. Start with a prompt (⌘P) if you're stuck
+    2. Toggle fullscreen (⌘F) to eliminate distractions
+    3. Use Ideas panel (⌘K) to capture tangential thoughts without losing focus
+    4. Create project folders by theme (Journal, Fiction, Work, etc.)
+    5. Typing sounds (⌘/) can help establish rhythm (or turn them off)
+
+
+═══════════════════════════════════════════════════════════════════════════════
+You're all set. Double-tap Esc to open the Projects Panel and Press N to open your first project.
+═══════════════════════════════════════════════════════════════════════════════`;
+
+        function ensureManualProject() {
+            // Check if manual project exists
+            const manualExists = projects.some(p => p.id === 1 && p.type === 'project');
+
+            if (!manualExists) {
+                // Create manual project with fixed ID = 1
+                const manualProject = {
+                    id: 1,
+                    name: '📖 User Manual',
+                    type: 'project',
+                    text: MANUAL_TEXT,
+                    ideas: [],
+                    backgroundIndex: 0,
+                    textSize: 'medium',
+                    font: 'Courier New',
+                    created: new Date().toISOString(),
+                    pinned: true
+                };
+
+                // Add to beginning of projects array
+                projects.unshift(manualProject);
+                console.log('✓ Created manual project');
+                saveProjects();
             }
         }
 
@@ -1823,8 +1998,14 @@ function init() {
         }
 
         function deleteProject(id) {
+            // Prevent deletion of manual
+            if (id === 1) {
+                alert('The User Manual cannot be deleted.');
+                return;
+            }
+
             if (!confirm('Delete this item? This cannot be undone.')) return;
-            
+
             function removeById(items) {
                 for (let i = 0; i < items.length; i++) {
                     if (items[i].id === id) {
@@ -1837,9 +2018,9 @@ function init() {
                 }
                 return false;
             }
-            
+
             removeById(projects);
-            
+
             if (currentProjectId === id) {
                 const firstProject = findFirstProject(projects);
                 if (firstProject) {
@@ -1848,12 +2029,18 @@ function init() {
                     initializeDefaultProject();
                 }
             }
-            
+
             saveProjects();
             renderProjects();
         }
 
         function renameProject(id) {
+            // Prevent renaming of manual
+            if (id === 1) {
+                alert('The User Manual cannot be renamed.');
+                return;
+            }
+
             const item = findProjectById(projects, id);
             if (!item) return;
 
@@ -1991,10 +2178,14 @@ function init() {
                 const query = projectsSearchInput.value.toLowerCase().trim();
                 flatProjectList = flattenProjects(projects);
 
+                // Separate manual from other projects
+                const manualItem = flatProjectList.find(({ item }) => item.id === 1);
+                const otherItems = flatProjectList.filter(({ item }) => item.id !== 1);
+
                 // Filter by search query
-                let filteredList = flatProjectList;
+                let filteredList = otherItems;
                 if (query) {
-                    filteredList = flatProjectList.filter(({ item }) => {
+                    filteredList = otherItems.filter(({ item }) => {
                         // Search in project/folder name
                         if (item.name.toLowerCase().includes(query)) return true;
 
@@ -2003,6 +2194,11 @@ function init() {
 
                         return false;
                     });
+                }
+
+                // Always include manual at top (unless searching and it doesn't match)
+                if (manualItem && (!query || manualItem.item.name.toLowerCase().includes(query))) {
+                    filteredList = [manualItem, ...filteredList];
                 }
 
                 if (filteredList.length === 0) {
@@ -2017,18 +2213,19 @@ function init() {
                     const isActive = item.id === currentProjectId;
                     const isSelected = index === selectedProjectIndex;
                     const indentClass = depth > 0 ? `project-indent-${Math.min(depth, 3)}` : '';
+                    const isPinned = item.id === 1;
 
                     let icon = '';
                     if (item.type === 'folder') {
                         icon = item.expanded ? '▾' : '▸';
                     } else {
-                        icon = '·';
+                        icon = isPinned ? '📌' : '·';
                     }
 
                     return `
-                        <div class="project-item ${isActive ? 'active' : ''} ${isSelected ? 'selected' : ''} ${indentClass}"
+                        <div class="project-item ${isActive ? 'active' : ''} ${isSelected ? 'selected' : ''} ${indentClass} ${isPinned ? 'pinned' : ''}"
                              onclick="handleProjectClick(${item.id}, '${item.type}', event)"
-                             draggable="true"
+                             draggable="${!isPinned}"
                              data-id="${item.id}"
                              data-index="${index}">
                             <span class="project-icon">${icon}</span>
