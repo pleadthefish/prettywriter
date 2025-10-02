@@ -1661,7 +1661,7 @@ ESSENTIAL COMMANDS
     ⌘S          Save current project
     ⌘K          Toggle Ideas panel
     Esc Esc     Toggle Projects panel (double-tap Escape)
-    ⌘\\          Toggle History panel
+    ⌘\          Toggle History panel
     ⌘E          Export menu
     ⌘F          Fullscreen (browser shortcut)
 
@@ -1670,6 +1670,7 @@ WRITING ENVIRONMENT
     ⌘P          Show random writing prompt
     ⌘F          Toggle fullscreen
     ⌘/          Toggle typing sound effects (FX)
+    fn↑/↓       Page Up / Page Down (browser shorcut)
 
 TEXT CONTROLS
     ⌘]          Next font
@@ -1690,8 +1691,8 @@ BASIC USAGE
     Enter       Open selected project
     R           Rename project/folder
     Delete      Delete project/folder
-    Up/Down Arrows  Navigate list
-    Left/Right Arrows Collapse/open folder
+    ↑/↓         Navigate list
+    ←/→         Collapse/open folder
     0           Jump to root level
 
 HOW SAVING WORKS
@@ -1703,7 +1704,7 @@ HOW SAVING WORKS
 HISTORY PANEL
 ──────────────────────────────
 Functions like a browser history, time stamping your project history and saving it in order. Use it to quickly return to previous projects, if you find the workflow useful.
-    • ⌘\\         Open History panel
+    ⌘\          Open History panel
 
 
 ═══════════════════════════════════════════════════════════════════════════════
@@ -1781,14 +1782,14 @@ You're all set. Double-tap Esc to open the Projects Panel and Press N to open yo
 ═══════════════════════════════════════════════════════════════════════════════`;
 
         function ensureManualProject() {
-            // Check if manual project exists
-            const manualExists = projects.some(p => p.id === 1 && p.type === 'project');
+            // Find existing manual project
+            const manual = projects.find(p => p.id === 1 && p.type === 'project');
 
-            if (!manualExists) {
+            if (!manual) {
                 // Create manual project with fixed ID = 1
                 const manualProject = {
                     id: 1,
-                    name: '📖 User Manual',
+                    name: 'User Manual',
                     type: 'project',
                     text: MANUAL_TEXT,
                     ideas: [],
@@ -1802,6 +1803,13 @@ You're all set. Double-tap Esc to open the Projects Panel and Press N to open yo
                 // Add to beginning of projects array
                 projects.unshift(manualProject);
                 console.log('✓ Created manual project');
+                saveProjects();
+            } else {
+                // Update existing manual with latest text and name
+                manual.text = MANUAL_TEXT;
+                manual.name = 'User Manual';
+                manual.pinned = true;
+                console.log('✓ Updated manual project');
                 saveProjects();
             }
         }
@@ -2419,7 +2427,12 @@ You're all set. Double-tap Esc to open the Projects Panel and Press N to open yo
         }
 
         function handleHistoryKeyboard(e) {
-            // Don't handle shortcuts if search input is focused
+            // Blur search input on arrow keys to enable navigation
+            if (document.activeElement === historySearchInput && (e.key === 'ArrowUp' || e.key === 'ArrowDown')) {
+                historySearchInput.blur();
+            }
+
+            // Don't handle other shortcuts if search input is focused
             if (document.activeElement === historySearchInput) return;
 
             const query = historySearchInput.value.toLowerCase().trim();
