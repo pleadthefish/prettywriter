@@ -981,6 +981,12 @@
         ];
         let currentBgIndex = 0;
 
+        // Preload all background images
+        backgrounds.forEach(bg => {
+            const img = new Image();
+            img.src = bg.url;
+        });
+
         const prompts = [
             "Write about a place you've never been but dream about often.",
             "Describe a sound that takes you back to childhood.",
