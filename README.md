@@ -60,12 +60,33 @@ Like a typewriter, PrettyWriter keeps things simple:
 - Minimal formatting - focus on the first draft
 - Keyboard shortcuts keep you in the flow
 - No mousing about while you're writing
+- Notes & Ideas panel for networked, non-linear thought capture
 
 The first draft is never the best draft, but it's the most important one. You can't go anywhere without a first draft.
 
 ## License
 
 MIT License - See [LICENSE](LICENSE) for details
+## 📜 Licensing
+
+### Software Code
+The source code is licensed under the [MIT License](LICENSE) - feel free to 
+learn from, modify, and build upon this project.
+
+### Photography & Media
+**All photographs and audio files are © 2025 [Your Name], All Rights Reserved.**
+
+These are my original creative works and are **not** covered by the MIT license. 
+They are provided for viewing within this application only. Please do not 
+extract, redistribute, or reuse these images without permission.
+
+See [CONTENT-LICENSE.txt](CONTENT-LICENSE.txt) for full terms.
+
+### Want to Use This Project?
+- Fork the code and add your own photos/music
+- Learn from and improve the code
+- Share and contribute improvements
+- Please don't redistribute my original photography
 
 ## Development Status
 

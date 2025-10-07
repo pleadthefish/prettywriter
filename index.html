@@ -186,18 +186,34 @@
 
         .shortcuts-hint {
             position: fixed;
-            bottom: 20px;
-            right: 20px;
+            bottom: 21px;
+            left: 100px;
             z-index: 10;
-            color: rgba(255, 255, 255, 0.6);
+            color: rgba(255, 255, 255, 0.5);
             font-size: 11px;
-            text-align: right;
-            line-height: 1.8;
+            text-align: left;
+            line-height: 1;
             opacity: 0.6;
             transition: opacity 0.3s;
         }
 
         .shortcuts-hint:hover {
+            opacity: 0.9;
+        }
+
+        .photo-credit {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 10;
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 11px;
+            text-align: right;
+            opacity: 0.6;
+            transition: opacity 0.3s;
+        }
+
+        .photo-credit:hover {
             opacity: 0.9;
         }
 
@@ -823,6 +839,9 @@
         ⌘K Ideas · Esc Esc Projects · ⌘\ History · ⌘P Prompt · ⌘B Background · ⌘E Export · ⌘/ Sound · ⌘S Save · ⌘F Fullscreen
     </div>
 
+    <!-- PHOTO CREDIT -->
+    <div class="photo-credit">Photos © 2025 Drew Parrish</div>
+
     <!-- PROJECTS PANEL -->
     <div class="projects-panel" id="projectsPanel">
         <div class="projects-header">
@@ -943,13 +962,14 @@
         </div>
     </div>
 
+    <script src="manual.js"></script>
     <script>
         const backgrounds = [
-            './images/photo1.jpg',
-            './images/photo2.jpg',
-            './images/photo3.jpg',
-            './images/photo4.jpg',
-            './images/photo5.jpg'
+            { url: './images/photo1.jpg', photographer: 'Drew Parrish' },
+            { url: './images/photo2.jpg', photographer: 'Drew Parrish' },
+            { url: './images/photo3.jpg', photographer: 'Drew Parrish' },
+            { url: './images/photo4.jpg', photographer: 'Drew Parrish' },
+            { url: './images/photo5.jpg', photographer: 'Drew Parrish' }
         ];
         
         let currentBgIndex = 0;
@@ -993,6 +1013,7 @@
         const promptModalTitle = document.getElementById('promptModalTitle');
         const promptModalInput = document.getElementById('promptModalInput');
        const folderSelect = document.getElementById('folderSelect');
+        const photoCreditEl = document.querySelector('.photo-credit');
 
 let ideas = [];
 let editingId = null;
@@ -1074,6 +1095,11 @@ function init() {
         updateWordCount();
         changeBackground();
         updateHashtagLibrary();
+
+        // Set initial background and photo credit if not already set by loadProject
+        const currentBg = backgrounds[currentBgIndex];
+        bgImage.style.backgroundImage = `url('${currentBg.url}')`;
+        photoCreditEl.textContent = `Photos © 2025 ${currentBg.photographer}`;
         renderIdeas();
         renderGlobalIdeas();
         renderProjects();
@@ -1642,146 +1668,7 @@ function init() {
             }
         }
 
-        const MANUAL_TEXT = `═══════════════════════════════════════════════════════════════════════════════
-                           P R E T T Y W R I T E R
-                              U S E R   M A N U A L
-═══════════════════════════════════════════════════════════════════════════════
-
-Welcome to PrettyWriter, a distraction-free writing environment inspired by composing on analog typewriters. Typewriters are fun, tactile, and wholly focused. They make you want to use them and they hold you in the creative writing space. A digital approximation of that phenomenon is the goal of PrettyWriter.
-
-With its array of keyboard shortcuts, PrettyWriter is designed to keep your fingers on the keys and the words flowing. You'll find that several functions can only be accomplished with keyboard shortcuts. You're not writing if you're mousing about!
-
-Like a typewriter, there is minimal text formatting available. Don't worry about it, just start writing. The first draft is NEVER the best draft, but it is the most important one. You can't go anywhere without a first draft!
-
-Typewriters are beautiful machines. At one time they were everyday function-driven tools, but now they are a class example of analog design and ingenuity. PrettyWriter utilizes curated original photography to evoke that sense that you're writing on a work of art. Creativity begets creativity. 
-
-═══════════════════════════════════════════════════════════════════════════════
-KEYBOARD SHORTCUTS
-═══════════════════════════════════════════════════════════════════════════════
-
-ESSENTIAL COMMANDS
-    ⌘S          Save current project
-    ⌘K          Toggle Ideas panel
-    Esc Esc     Toggle Projects panel (double-tap Escape)
-    ⌘\          Toggle History panel
-    ⌘E          Export menu
-    ⌘F          Fullscreen (browser shortcut)
-
-WRITING ENVIRONMENT
-    ⌘B          Change background image
-    ⌘P          Show random writing prompt
-    ⌘F          Toggle fullscreen
-    ⌘/          Toggle typing sound effects (FX)
-    fn↑/↓       Page Up / Page Down (browser shortcut)
-
-TEXT CONTROLS
-    ⌘]          Next font
-    ⌘[          Previous font
-    ⌘.          Increase text size
-    ⌘,          Decrease text size
-
-
-═══════════════════════════════════════════════════════════════════════════════
-PROJECTS PANEL (Esc Esc)
-═══════════════════════════════════════════════════════════════════════════════
-
-The Projects panel is a basic file and document saving structure to organize all your writing into separate projects and folders. Each project saves its own text, ideas and notes, background, and font settings.
-
-BASIC USAGE
-    N           Create new project
-    F           Create new folder
-    Enter       Open selected project
-    R           Rename project/folder
-    Delete      Delete project/folder
-    ↑/↓         Navigate list
-    ←/→         Collapse/open folder
-    0           Jump to root level
-
-HOW SAVING WORKS
-    • Your text saves automatically as you type
-    • ⌘S (panel closed): First time creates a new project with a name
-    • ⌘S (panel open): Immediately saves to current project
-    • Each project remembers: text, ideas & notes, background, font, and text size
-
-HISTORY PANEL
-──────────────────────────────
-Functions like a browser history, time stamping your project history and saving it in order. Use it to quickly return to previous projects, if you find the workflow useful.
-    ⌘\          Open History panel
-
-
-═══════════════════════════════════════════════════════════════════════════════
-IDEAS & NOTES PANEL (⌘K)
-═══════════════════════════════════════════════════════════════════════════════
-
-A scratchpad for capturing thoughts, notes, and ideas as you write with minimal disruption to your flow. PrettyWriter promotes networked thinking to tap creativity.
-
-BASIC USAGE
-    • Type an idea in the input box
-    • Enter: Save idea
-    • Shift+Enter: Line break within input box (multi-line ideas)
-    • Click any idea to edit it
-    • Ideas save to the current project automatically
-
-HASHTAGS
-    • Use #hashtags anywhere in your ideas (e.g., "research scene #chapter3")
-    • All hashtags appear as clickable pills above the input
-    • Click a hashtag to filter ideas
-
-TWO LISTS
-    1. CURRENT PROJECT — Ideas for the project you're working on
-    2. RECENT IDEAS — Ideas from other projects (click to jump to that project)
-
-
-═══════════════════════════════════════════════════════════════════════════════
-EXPORT (⌘E)
-═══════════════════════════════════════════════════════════════════════════════
-
-Save your writing to your computer in different formats:
-    1  Plain text (.txt)
-    2  Markdown (.md)
-    3  HTML document (.html)
-
-Files download with today's date automatically.
-
-Note: As of right now, PrettyWriter utilizes local browser storage, not cloud storage. If you clear your browser cache you'll lose your work. Exporting is an important backup measure.
-═══════════════════════════════════════════════════════════════════════════════
-FOR TESTERS
-═══════════════════════════════════════════════════════════════════════════════
-Let me know what you liked, what you didn't like! This is a fluid development. An idea coming to life in real time.
-
-YOUR DATA
-    • Everything saves to your browser's local storage
-    • Data persists between sessions on this device/browser only
-    • NOT synced between devices or browsers
-    • Clearing browser data will erase all projects
-
-KNOWN LIMITATIONS (EARLY VERSION)
-    • No cloud sync or backup yet
-    • No undo/redo (use ⌘Z for browser undo)
-    • Custom fonts may not load if font files are missing
-    • Background images need to be in the ./images/ folder
-    • Bugs, surely. Bear with me.
-
-REPORTING ISSUES
-When something breaks, please note:
-    • What you were doing when it happened
-    • Which keyboard shortcut or button you pressed
-    • Whether the browser console shows errors (F12 → Console tab)
-
-═══════════════════════════════════════════════════════════════════════════════
-TIPS FOR FOCUSED WRITING
-═══════════════════════════════════════════════════════════════════════════════
-
-    1. Start with a prompt (⌘P) if you're stuck
-    2. Toggle fullscreen (⌘F) to eliminate distractions
-    3. Use Ideas panel (⌘K) to capture tangential thoughts without losing focus
-    4. Create project folders by theme (Journal, Fiction, Work, etc.)
-    5. Typing sounds (⌘/) can help establish rhythm (or turn them off)
-
-
-═══════════════════════════════════════════════════════════════════════════════
-You're all set. Double-tap Esc to open the Projects Panel and Press N to open your first project.
-═══════════════════════════════════════════════════════════════════════════════`;
+        // Manual text is now loaded from manual.js
 
         function ensureManualProject() {
             // Check if manual project exists
@@ -1917,7 +1804,9 @@ You're all set. Double-tap Esc to open the Projects Panel and Press N to open yo
                 currentBgIndex = project.backgroundIndex || 0;
                 currentTextSize = project.textSize || 'medium';
 
-                bgImage.style.backgroundImage = `url('${backgrounds[currentBgIndex]}')`;
+                const bg = backgrounds[currentBgIndex];
+                bgImage.style.backgroundImage = `url('${bg.url}')`;
+                photoCreditEl.textContent = `Photos © 2025 ${bg.photographer}`;
                 applyTextSize();
                 updateWordCount();
                 updateHashtagLibrary();
@@ -2718,7 +2607,9 @@ You're all set. Double-tap Esc to open the Projects Panel and Press N to open yo
 
         function changeBackground() {
             currentBgIndex = (currentBgIndex + 1) % backgrounds.length;
-            bgImage.style.backgroundImage = `url('${backgrounds[currentBgIndex]}')`;
+            const bg = backgrounds[currentBgIndex];
+            bgImage.style.backgroundImage = `url('${bg.url}')`;
+            photoCreditEl.textContent = `Photos © 2025 ${bg.photographer}`;
         }
 
         function showPrompt() {
