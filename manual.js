@@ -3,21 +3,20 @@ const MANUAL_TEXT = `═══════════════════�
                               U S E R   M A N U A L
 ═══════════════════════════════════════════════════════════════════════════════
 
-Welcome to PrettyWriter, a distraction-free writing environment inspired by composing on analog typewriters and removing barriers between your creative ideas being written down.
+Welcome to PrettyWriter, a minimalist writing environment inspired by composing on analog typewriters. Typewriters are fun, tactile, dedicated writing tools. They inspire a desire to use them--a desire to write. It's just you, the machine, and the page. A typewriter engages your attention on your writing in a way a computer cannot.
 
-With a typewriter it's just you, the machine, and the page. With its array of keyboard shortcuts, PrettyWriter is designed to keep your fingers on the keys and the words flowing. You'll notice that the Projects panel and the Ideas & Notes panel can only be opened with keyboard shortcuts. You're not writing if you're mousing about!
+In the end, somehow, what you write feels more original. Or, at least, the writing experience was more special. A digital approximation of these phenomena is the goal of PrettyWriter.
 
-Like a typewriter, there is minimal text formatting available. Don't worry about it, just start writing. The first draft is NEVER the best draft, but the most important one. You can't go anywhere without a first draft.
-
-───────────────────────────────────────────────────────────────────────────────
+═══════════════════════════════════════════════════════════════════════════════
 KEYBOARD SHORTCUTS
-───────────────────────────────────────────────────────────────────────────────
+═══════════════════════════════════════════════════════════════════════════════
+PrettyWriter is designed to keep your fingers on the keys. You're not writing if you're mousing about! You'll find that several functions can only be accomplished with keyboard shortcuts.
 
 ESSENTIAL COMMANDS
     ⌘S          Save current project
     ⌘K          Toggle Ideas panel
     Esc Esc     Toggle Projects panel (double-tap Escape)
-    ⌘\          Toggle History panel
+    ⌘           Toggle History panel
     ⌘E          Export menu
     ⌘F          Fullscreen (browser shortcut)
 
@@ -26,6 +25,7 @@ WRITING ENVIRONMENT
     ⌘P          Show random writing prompt
     ⌘F          Toggle fullscreen
     ⌘/          Toggle typing sound effects (FX)
+    fn↑/↓       Page Up / Page Down (browser shortcut)
 
 TEXT CONTROLS
     ⌘]          Next font
@@ -34,10 +34,9 @@ TEXT CONTROLS
     ⌘,          Decrease text size
 
 
-───────────────────────────────────────────────────────────────────────────────
+═══════════════════════════════════════════════════════════════════════════════
 PROJECTS PANEL (Esc Esc)
-───────────────────────────────────────────────────────────────────────────────
-
+═══════════════════════════════════════════════════════════════════════════════
 The Projects panel is a basic file and document saving structure to organize all your writing into separate projects and folders. Each project saves its own text, ideas and notes, background, and font settings.
 
 BASIC USAGE
@@ -46,8 +45,8 @@ BASIC USAGE
     Enter       Open selected project
     R           Rename project/folder
     Delete      Delete project/folder
-    Up/Down Arrows  Navigate list
-    Left/Right Arrows Collapse/open folder
+    ↑/↓         Navigate list
+    ←/→         Collapse/open folder
     0           Jump to root level
 
 HOW SAVING WORKS
@@ -57,15 +56,14 @@ HOW SAVING WORKS
     • Each project remembers: text, ideas & notes, background, font, and text size
 
 HISTORY PANEL
-─────────────────────────────
+──────────────────────────────
 Functions like a browser history, time stamping your project history and saving it in order. Use it to quickly return to previous projects, if you find the workflow useful.
-    • ⌘\         Open History panel
+    ⌘          Open History panel
 
 
-───────────────────────────────────────────────────────────────────────────────
+═══════════════════════════════════════════════════════════════════════════════
 IDEAS & NOTES PANEL (⌘K)
-───────────────────────────────────────────────────────────────────────────────
-
+═══════════════════════════════════════════════════════════════════════════════
 A scratchpad for capturing thoughts, notes, and ideas as you write with minimal disruption to your flow. PrettyWriter promotes networked thinking to tap creativity.
 
 BASIC USAGE
@@ -85,9 +83,9 @@ TWO LISTS
     2. RECENT IDEAS — Ideas from other projects (click to jump to that project)
 
 
-───────────────────────────────────────────────────────────────────────────────
+═══════════════════════════════════════════════════════════════════════════════
 EXPORT (⌘E)
-───────────────────────────────────────────────────────────────────────────────
+═══════════════════════════════════════════════════════════════════════════════
 
 Save your writing to your computer in different formats:
     1  Plain text (.txt)
@@ -97,10 +95,16 @@ Save your writing to your computer in different formats:
 Files download with today's date automatically.
 
 Note: As of right now, PrettyWriter utilizes local browser storage, not cloud storage. If you clear your browser cache you'll lose your work. Exporting is an important backup measure.
-───────────────────────────────────────────────────────────────────────────────
+═══════════════════════════════════════════════════════════════════════════════
+The Photography
+═══════════════════════════════════════════════════════════════════════════════
+PrettyWriter backgrounds are original film photography to enhance immersion. Plus, creativity begets creativity, right?
+
+═══════════════════════════════════════════════════════════════════════════════
 FOR TESTERS
-───────────────────────────────────────────────────────────────────────────────
-Let me know what you liked, what you didn't like! This is a fluid development. An idea coming to life in real time.
+═══════════════════════════════════════════════════════════════════════════════
+Let me know what you like and what you don't!
+Link to feedback form: https://forms.gle/CPZp7xWGc5zJiFbFA (did you try and click it??)
 
 YOUR DATA
     • Everything saves to your browser's local storage
@@ -109,28 +113,21 @@ YOUR DATA
     • Clearing browser data will erase all projects
 
 KNOWN LIMITATIONS (EARLY VERSION)
-    • No cloud sync or backup yet
-    • No undo/redo (use ⌘Z for browser undo)
-    • Custom fonts may not load if font files are missing
-    • Background images need to be in the ./images/ folder
-    • Bugs, surely. Bear with me.
+    • No cloud sync or backup
+    • No development into mobile optimization
+    • Can't access Projects panel in fullscreen
+    • No docx or pdf exporting
+    • Limited text formatting (at this stage, this is intentional. It's closer to      the typewriter experience. I'm unsure if it is too much of a deviation from the computer word processing expectations to be sensible. Let me know what you think in the form above!)
 
-REPORTING ISSUES
-When something breaks, please note:
-    • What you were doing when it happened
-    • Which keyboard shortcut or button you pressed
-    • Whether the browser console shows errors (F12 → Console tab)
-
-───────────────────────────────────────────────────────────────────────────────
+═══════════════════════════════════════════════════════════════════════════════
 TIPS FOR FOCUSED WRITING
-───────────────────────────────────────────────────────────────────────────────
+═══════════════════════════════════════════════════════════════════════════════
 
     1. Start with a prompt (⌘P) if you're stuck
     2. Toggle fullscreen (⌘F) to eliminate distractions
     3. Use Ideas panel (⌘K) to capture tangential thoughts without losing focus
     4. Create project folders by theme (Journal, Fiction, Work, etc.)
     5. Typing sounds (⌘/) can help establish rhythm (or turn them off)
-
 
 ═══════════════════════════════════════════════════════════════════════════════
 You're all set. Double-tap Esc to open the Projects Panel and Press N to open your first project.
