@@ -1251,6 +1251,20 @@ function init() {
                     increaseTextSize();
                 }
 
+                // Tab key for indentation
+                if (e.key === 'Tab' && document.activeElement === editor) {
+                    e.preventDefault();
+                    const start = editor.selectionStart;
+                    const end = editor.selectionEnd;
+                    const value = editor.value;
+
+                    // Insert tab character
+                    editor.value = value.substring(0, start) + '\t' + value.substring(end);
+
+                    // Move cursor after the tab
+                    editor.selectionStart = editor.selectionEnd = start + 1;
+                }
+
                 if (e.key === 'Escape') {
                     // Check for double-tap FIRST
                     const now = Date.now();
