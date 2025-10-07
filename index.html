@@ -1104,13 +1104,23 @@ function init() {
             }
         }
 
-        loadSavedText();
-        loadIdeas();
-        loadTextSize();
-        loadFont();
-        updateWordCount();
-        changeBackground();
-        updateHashtagLibrary();
+        // Load current project with all its settings
+        const project = getCurrentProject();
+        if (project) {
+            editor.value = project.text || '';
+            ideas = project.ideas || [];
+            currentBgIndex = project.backgroundIndex || 0;
+            currentTextSize = project.textSize || 'medium';
+            currentFont = project.font || 'Georgia';
+
+            applyTextSize();
+            applyFont();
+            updateSizeDisplay();
+            updateFontDisplay();
+            updateWordCount();
+            changeBackground();
+            updateHashtagLibrary();
+        }
 
         // Set initial background and photo credit if not already set by loadProject
         const currentBg = backgrounds[currentBgIndex];
@@ -1840,11 +1850,15 @@ function init() {
                 ideas = project.ideas || [];
                 currentBgIndex = project.backgroundIndex || 0;
                 currentTextSize = project.textSize || 'medium';
+                currentFont = project.font || 'Georgia';
 
                 const bg = backgrounds[currentBgIndex];
                 bgImage.style.backgroundImage = `url('${bg.url}')`;
                 photoCreditEl.textContent = `Photo © 2025 ${bg.photographer}`;
                 applyTextSize();
+                applyFont();
+                updateSizeDisplay();
+                updateFontDisplay();
                 updateWordCount();
                 updateHashtagLibrary();
                 renderIdeas();
