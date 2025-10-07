@@ -3,8 +3,8 @@
                               U S E R   M A N U A L
 ═══════════════════════════════════════════════════════════════════════════════
 
-Welcome to PrettyWriter, a minimalist writing environment inspired by composing on analog typewriters. Typewriters are fun, tactile, dedicated writing tools. They cause you a desire to use them--a desire to write. It's just you, the machine, and the page. A typewriter engages your attention on your writing in a way a computer cannot. In the end, somehow, what you write feels more original. At least, the writing experience was more special. 
 
+Welcome to PrettyWriter, a minimalist writing environment inspired by composing on analog typewriters. Typewriters are fun, tactile, dedicated writing tools. They inspire a desire to use them--a desire to write. It's just you, the machine, and the page. A typewriter engages your attention on your writing in a way a computer cannot. In the end, somehow, what you write feels more original. Or, at the very least, the writing experience was more special. 
 A digital approximation of these phenomena is the goal of PrettyWriter.
 
 With its array of keyboard shortcuts, PrettyWriter is designed to keep your fingers on the keys. You're not writing if you're mousing about! You'll find that several functions can only be accomplished with keyboard shortcuts. 
