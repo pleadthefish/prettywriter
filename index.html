@@ -840,7 +840,7 @@
     </div>
 
     <!-- PHOTO CREDIT -->
-    <div class="photo-credit">Photos © 2025 Drew Parrish</div>
+    <div class="photo-credit">Photo © 2025 Drew Parrish</div>
 
     <!-- PROJECTS PANEL -->
     <div class="projects-panel" id="projectsPanel">
@@ -969,9 +969,16 @@
             { url: './images/photo2.jpg', photographer: 'Drew Parrish' },
             { url: './images/photo3.jpg', photographer: 'Drew Parrish' },
             { url: './images/photo4.jpg', photographer: 'Drew Parrish' },
-            { url: './images/photo5.jpg', photographer: 'Drew Parrish' }
+            { url: './images/photo5.jpg', photographer: 'Drew Parrish' },
+            { url: './images/photo6.jpg', photographer: 'Drew Parrish' },
+            { url: './images/photo7.jpg', photographer: 'Drew Parrish' },
+            { url: './images/photo8.jpg', photographer: 'Drew Parrish' },
+            { url: './images/photo9.jpg', photographer: 'Drew Parrish' },
+            { url: './images/photo10.jpg', photographer: 'Drew Parrish' },
+            { url: './images/photo11.jpg', photographer: 'Drew Parrish' },
+            { url: './images/photo12.jpg', photographer: 'Drew Parrish' },
+            { url: './images/photo13.jpg', photographer: 'Drew P' }
         ];
-        
         let currentBgIndex = 0;
 
         const prompts = [
@@ -1099,7 +1106,7 @@ function init() {
         // Set initial background and photo credit if not already set by loadProject
         const currentBg = backgrounds[currentBgIndex];
         bgImage.style.backgroundImage = `url('${currentBg.url}')`;
-        photoCreditEl.textContent = `Photos © 2025 ${currentBg.photographer}`;
+        photoCreditEl.textContent = `Photo © 2025 ${currentBg.photographer}`;
         renderIdeas();
         renderGlobalIdeas();
         renderProjects();
@@ -1806,7 +1813,7 @@ function init() {
 
                 const bg = backgrounds[currentBgIndex];
                 bgImage.style.backgroundImage = `url('${bg.url}')`;
-                photoCreditEl.textContent = `Photos © 2025 ${bg.photographer}`;
+                photoCreditEl.textContent = `Photo © 2025 ${bg.photographer}`;
                 applyTextSize();
                 updateWordCount();
                 updateHashtagLibrary();
@@ -2609,7 +2616,13 @@ function init() {
             currentBgIndex = (currentBgIndex + 1) % backgrounds.length;
             const bg = backgrounds[currentBgIndex];
             bgImage.style.backgroundImage = `url('${bg.url}')`;
-            photoCreditEl.textContent = `Photos © 2025 ${bg.photographer}`;
+
+            // Fade out, update, fade in
+            photoCreditEl.style.opacity = '0';
+            setTimeout(() => {
+                photoCreditEl.textContent = `Photo © 2025 ${bg.photographer}`;
+                photoCreditEl.style.opacity = '0.6';
+            }, 150);
         }
 
         function showPrompt() {
