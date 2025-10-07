@@ -2705,10 +2705,23 @@ function init() {
 
         function exportAs(format) {
             const text = editor.value;
-            const filename = `writing-${new Date().toISOString().split('T')[0]}`;
-            
+            const project = getCurrentProject();
+
             toggleExportMenu();
 
+            // Use project name if available, otherwise prompt for filename
+            if (project && project.name) {
+                performExport(format, text, project.name);
+            } else {
+                showCustomPrompt('Export filename', function(filename) {
+                    if (filename && filename.trim()) {
+                        performExport(format, text, filename.trim());
+                    }
+                });
+            }
+        }
+
+        function performExport(format, text, filename) {
             switch(format) {
                 case 'txt':
                     exportTXT(text, filename);
