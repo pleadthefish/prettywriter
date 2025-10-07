@@ -3,26 +3,21 @@ const MANUAL_TEXT = `═══════════════════�
                               U S E R   M A N U A L
 ═══════════════════════════════════════════════════════════════════════════════
 
+Welcome to PrettyWriter, a distraction-free writing environment inspired by composing on analog typewriters and removing barriers between your creative ideas being written down.
 
-Welcome to PrettyWriter, a minimalist writing environment inspired by composing on analog typewriters. Typewriters are fun, tactile, dedicated writing tools. They inspire a desire to use them--a desire to write. It's just you, the machine, and the page. A typewriter engages your attention on your writing in a way a computer cannot. In the end, somehow, what you write feels more original. Or, at least, the writing experience was more special.
+With a typewriter it's just you, the machine, and the page. With its array of keyboard shortcuts, PrettyWriter is designed to keep your fingers on the keys and the words flowing. You'll notice that the Projects panel and the Ideas & Notes panel can only be opened with keyboard shortcuts. You're not writing if you're mousing about!
 
-A digital approximation of these phenomena is the goal of PrettyWriter.
+Like a typewriter, there is minimal text formatting available. Don't worry about it, just start writing. The first draft is NEVER the best draft, but the most important one. You can't go anywhere without a first draft.
 
-With its array of keyboard shortcuts, PrettyWriter is designed to keep your fingers on the keys. You're not writing if you're mousing about! You'll find that several functions can only be accomplished with keyboard shortcuts.
-
-Like a typewriter, there is minimal text formatting available. Don't worry about it, just start writing. The first draft is NEVER the best draft, but it is the most important one. You can't go anywhere without a first draft!
-
-Typewriters are beautiful machines. At one time they were everyday function-driven tools, but now they are class examples of analog design and ingenuity. PrettyWriter utilizes curated original photography to evoke that sense that you're writing on a work of art. Creativity begets creativity.
-
-═══════════════════════════════════════════════════════════════════════════════
+───────────────────────────────────────────────────────────────────────────────
 KEYBOARD SHORTCUTS
-═══════════════════════════════════════════════════════════════════════════════
+───────────────────────────────────────────────────────────────────────────────
 
 ESSENTIAL COMMANDS
     ⌘S          Save current project
     ⌘K          Toggle Ideas panel
     Esc Esc     Toggle Projects panel (double-tap Escape)
-    ⌘           Toggle History panel
+    ⌘\          Toggle History panel
     ⌘E          Export menu
     ⌘F          Fullscreen (browser shortcut)
 
@@ -31,7 +26,6 @@ WRITING ENVIRONMENT
     ⌘P          Show random writing prompt
     ⌘F          Toggle fullscreen
     ⌘/          Toggle typing sound effects (FX)
-    fn↑/↓       Page Up / Page Down (browser shortcut)
 
 TEXT CONTROLS
     ⌘]          Next font
@@ -40,9 +34,9 @@ TEXT CONTROLS
     ⌘,          Decrease text size
 
 
-═══════════════════════════════════════════════════════════════════════════════
+───────────────────────────────────────────────────────────────────────────────
 PROJECTS PANEL (Esc Esc)
-═══════════════════════════════════════════════════════════════════════════════
+───────────────────────────────────────────────────────────────────────────────
 
 The Projects panel is a basic file and document saving structure to organize all your writing into separate projects and folders. Each project saves its own text, ideas and notes, background, and font settings.
 
@@ -52,8 +46,8 @@ BASIC USAGE
     Enter       Open selected project
     R           Rename project/folder
     Delete      Delete project/folder
-    ↑/↓         Navigate list
-    ←/→         Collapse/open folder
+    Up/Down Arrows  Navigate list
+    Left/Right Arrows Collapse/open folder
     0           Jump to root level
 
 HOW SAVING WORKS
@@ -63,14 +57,14 @@ HOW SAVING WORKS
     • Each project remembers: text, ideas & notes, background, font, and text size
 
 HISTORY PANEL
-──────────────────────────────
+─────────────────────────────
 Functions like a browser history, time stamping your project history and saving it in order. Use it to quickly return to previous projects, if you find the workflow useful.
-    ⌘          Open History panel
+    • ⌘\         Open History panel
 
 
-═══════════════════════════════════════════════════════════════════════════════
+───────────────────────────────────────────────────────────────────────────────
 IDEAS & NOTES PANEL (⌘K)
-═══════════════════════════════════════════════════════════════════════════════
+───────────────────────────────────────────────────────────────────────────────
 
 A scratchpad for capturing thoughts, notes, and ideas as you write with minimal disruption to your flow. PrettyWriter promotes networked thinking to tap creativity.
 
@@ -91,9 +85,9 @@ TWO LISTS
     2. RECENT IDEAS — Ideas from other projects (click to jump to that project)
 
 
-═══════════════════════════════════════════════════════════════════════════════
+───────────────────────────────────────────────────────────────────────────────
 EXPORT (⌘E)
-═══════════════════════════════════════════════════════════════════════════════
+───────────────────────────────────────────────────────────────────────────────
 
 Save your writing to your computer in different formats:
     1  Plain text (.txt)
@@ -103,9 +97,9 @@ Save your writing to your computer in different formats:
 Files download with today's date automatically.
 
 Note: As of right now, PrettyWriter utilizes local browser storage, not cloud storage. If you clear your browser cache you'll lose your work. Exporting is an important backup measure.
-═══════════════════════════════════════════════════════════════════════════════
+───────────────────────────────────────────────────────────────────────────────
 FOR TESTERS
-═══════════════════════════════════════════════════════════════════════════════
+───────────────────────────────────────────────────────────────────────────────
 Let me know what you liked, what you didn't like! This is a fluid development. An idea coming to life in real time.
 
 YOUR DATA
@@ -116,14 +110,20 @@ YOUR DATA
 
 KNOWN LIMITATIONS (EARLY VERSION)
     • No cloud sync or backup yet
+    • No undo/redo (use ⌘Z for browser undo)
     • Custom fonts may not load if font files are missing
     • Background images need to be in the ./images/ folder
-    • Can't access Projects panel in fullscreen
     • Bugs, surely. Bear with me.
 
-═══════════════════════════════════════════════════════════════════════════════
+REPORTING ISSUES
+When something breaks, please note:
+    • What you were doing when it happened
+    • Which keyboard shortcut or button you pressed
+    • Whether the browser console shows errors (F12 → Console tab)
+
+───────────────────────────────────────────────────────────────────────────────
 TIPS FOR FOCUSED WRITING
-═══════════════════════════════════════════════════════════════════════════════
+───────────────────────────────────────────────────────────────────────────────
 
     1. Start with a prompt (⌘P) if you're stuck
     2. Toggle fullscreen (⌘F) to eliminate distractions
