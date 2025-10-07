@@ -101,6 +101,153 @@
             scrollbar-width: none;
         }
 
+        /* PREVIEW CONTAINER */
+        .preview-container {
+            position: relative;
+            z-index: 3;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 60px 20px;
+            transition: padding-right 0.3s ease;
+        }
+
+        #markdownPreview {
+            width: 100%;
+            max-width: 800px;
+            height: 70vh;
+            overflow-y: auto;
+            color: #ffffff;
+            font-size: 20px;
+            line-height: 1.8;
+            font-family: 'Georgia', serif;
+        }
+
+        /* Markdown preview scrollbar - invisible like editor */
+        #markdownPreview::-webkit-scrollbar {
+            width: 0px;
+            display: none;
+        }
+
+        #markdownPreview::-webkit-scrollbar-track {
+            background: transparent;
+            border: none;
+        }
+
+        #markdownPreview::-webkit-scrollbar-thumb {
+            background: transparent;
+        }
+
+        #markdownPreview {
+            scrollbar-width: none;
+        }
+
+        /* Markdown styling */
+        #markdownPreview h1 {
+            font-size: 2em;
+            font-weight: bold;
+            margin: 0.67em 0;
+            line-height: 1.3;
+        }
+
+        #markdownPreview h2 {
+            font-size: 1.5em;
+            font-weight: bold;
+            margin: 0.75em 0;
+            line-height: 1.3;
+        }
+
+        #markdownPreview h3 {
+            font-size: 1.17em;
+            font-weight: bold;
+            margin: 0.83em 0;
+            line-height: 1.3;
+        }
+
+        #markdownPreview strong {
+            font-weight: bold;
+        }
+
+        #markdownPreview em {
+            font-style: italic;
+        }
+
+        #markdownPreview code {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+        }
+
+        #markdownPreview pre {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 16px;
+            border-radius: 6px;
+            overflow-x: auto;
+            margin: 1em 0;
+        }
+
+        #markdownPreview pre code {
+            background: transparent;
+            padding: 0;
+            font-size: 0.85em;
+            line-height: 1.6;
+        }
+
+        #markdownPreview blockquote {
+            border-left: 4px solid rgba(255, 255, 255, 0.3);
+            padding-left: 16px;
+            margin: 1em 0;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        #markdownPreview ul, #markdownPreview ol {
+            padding-left: 2em;
+            margin: 1em 0;
+        }
+
+        #markdownPreview li {
+            margin: 0.5em 0;
+        }
+
+        #markdownPreview a {
+            color: #6b9bd1;
+            text-decoration: none;
+        }
+
+        #markdownPreview a:hover {
+            text-decoration: underline;
+        }
+
+        #markdownPreview hr {
+            border: none;
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+            margin: 2em 0;
+        }
+
+        #markdownPreview p {
+            margin: 1em 0;
+        }
+
+        /* MODE INDICATOR */
+        .mode-indicator {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 10;
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 13px;
+            opacity: 0;
+            transition: opacity 0.3s;
+            pointer-events: none;
+        }
+
+        .mode-indicator.visible {
+            opacity: 1;
+        }
+
         .prompt-display {
             position: fixed;
             bottom: 40px;
@@ -809,6 +956,7 @@
             background: rgba(107, 155, 209, 0.2);
         }
     </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/9.1.6/marked.min.js"></script>
 </head>
 <body>
     <div class="bg-image" id="bgImage"></div>
@@ -816,6 +964,10 @@
 
     <div class="editor-container">
         <textarea id="editor" placeholder="Begin writing..." autofocus></textarea>
+    </div>
+
+    <div class="preview-container" id="previewContainer" style="display: none;">
+        <div id="markdownPreview"></div>
     </div>
 
     <div class="prompt-display" id="promptDisplay"></div>
@@ -834,9 +986,12 @@
     <!-- PROJECT TITLE -->
     <div class="project-title" id="projectTitle">Untitled</div>
 
+    <!-- MODE INDICATOR -->
+    <div class="mode-indicator" id="modeIndicator"></div>
+
     <!-- KEYBOARD SHORTCUTS REMINDER -->
     <div class="shortcuts-hint">
-        ⌘K Ideas · Esc Esc Projects · ⌘\ History · ⌘P Prompt · ⌘B Background · ⌘E Export · ⌘/ Sound · ⌘S Save · ⌘F Fullscreen
+        ⌘K Ideas · Esc Esc Projects · ⌘\ History · ⌘P Prompt · ⌘B Background · ⌘E Export · ⌘/ Sound · ⌘S Save · ⌘F Fullscreen · Ctrl+M Markdown Preview
     </div>
 
     <!-- PHOTO CREDIT -->
@@ -1063,6 +1218,13 @@ function init() {
     try {
         console.log('=== INIT START ===');
 
+        // Configure marked.js for markdown rendering
+        marked.setOptions({
+            breaks: true,
+            gfm: true,
+            headerIds: false
+        });
+
         const isFirstTime = !localStorage.getItem('hasVisited');
 
         loadProjects();  // was: loadprojects (lowercase p)
@@ -1232,6 +1394,12 @@ function init() {
                 if (mod && e.key === '/') {
                     e.preventDefault();
                     toggleSound();
+                }
+
+                // Markdown preview toggle - using Ctrl+M (specifically Ctrl, not Cmd)
+                if (e.ctrlKey && e.key === 'm') {
+                    e.preventDefault();
+                    togglePreview();
                 }
 
                 // Font cycle - using ⌘] (forward) and ⌘[ (backward)
@@ -1900,9 +2068,13 @@ function init() {
                         projects.push(newProject);
                     }
                 }
-                
+
                 saveProjects();
                 renderProjects();
+
+                // Auto-open the new project and close projects panel
+                loadProject(newProject.id);
+                toggleProjects();
             });
         }
 
@@ -2765,6 +2937,43 @@ ${paragraphs}
             } else {
                 editor.focus();
             }
+        }
+
+        // Markdown preview state
+        let isPreviewMode = false;
+
+        function renderMarkdown() {
+            const text = editor.value;
+            const html = marked.parse(text);
+            document.getElementById('markdownPreview').innerHTML = html;
+        }
+
+        function togglePreview() {
+            isPreviewMode = !isPreviewMode;
+
+            const editorContainer = document.querySelector('.editor-container');
+            const previewContainer = document.getElementById('previewContainer');
+            const modeIndicator = document.getElementById('modeIndicator');
+
+            if (isPreviewMode) {
+                // Switch to preview mode
+                renderMarkdown();
+                editorContainer.style.display = 'none';
+                previewContainer.style.display = 'flex';
+                modeIndicator.textContent = 'Preview Mode';
+            } else {
+                // Switch to edit mode
+                editorContainer.style.display = 'flex';
+                previewContainer.style.display = 'none';
+                modeIndicator.textContent = 'Edit Mode';
+                editor.focus();
+            }
+
+            // Show mode indicator briefly
+            modeIndicator.classList.add('visible');
+            setTimeout(() => {
+                modeIndicator.classList.remove('visible');
+            }, 1500);
         }
 
         function loadIdeas() {
