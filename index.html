@@ -1687,6 +1687,7 @@ function init() {
             if (manualIndex !== -1) {
                 // Update existing manual with latest text from manual.js
                 projects[manualIndex].text = MANUAL_TEXT;
+                projects[manualIndex].textSize = 'small';
                 console.log('✓ Updated manual project text');
                 saveProjects();
             } else {
@@ -1698,7 +1699,7 @@ function init() {
                     text: MANUAL_TEXT,
                     ideas: [],
                     backgroundIndex: 0,
-                    textSize: 'medium',
+                    textSize: 'small',
                     font: 'Courier New',
                     created: new Date().toISOString(),
                     pinned: true
