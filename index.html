@@ -103,12 +103,12 @@
 
         .prompt-display {
             position: fixed;
-            top: 20px;
+            bottom: 40px;
             left: 50%;
             transform: translateX(-50%);
             z-index: 10;
             background: rgba(0, 0, 0, 0.7);
-            padding: 20px 50px 20px 40px;
+            padding: 20px 40px;
             border-radius: 30px;
             max-width: 600px;
             text-align: center;
@@ -120,26 +120,6 @@
         .prompt-display.visible {
             opacity: 1;
             pointer-events: auto;
-        }
-
-        .prompt-close {
-            position: absolute;
-            top: 50%;
-            right: 15px;
-            transform: translateY(-50%);
-            width: 28px;
-            height: 28px;
-            cursor: pointer;
-            font-size: 24px;
-            line-height: 28px;
-            text-align: center;
-            color: #fff;
-            opacity: 0.7;
-            transition: opacity 0.2s;
-        }
-
-        .prompt-close:hover {
-            opacity: 1;
         }
 
         .word-count {
@@ -838,9 +818,7 @@
         <textarea id="editor" placeholder="Begin writing..." autofocus></textarea>
     </div>
 
-    <div class="prompt-display" id="promptDisplay">
-        <span class="prompt-close" id="promptClose">&times;</span>
-    </div>
+    <div class="prompt-display" id="promptDisplay"></div>
 
     <div class="word-count" id="wordCount">0 words</div>
 
@@ -1016,31 +994,17 @@
             "Write about the last time you surprised yourself.",
             "What do you think about writing?",
             "Describe a dream you had recently.",
-            "What would be a chapter in your autobiography? What is the title? Write a brief arch or outline of what happened and why it's worthy of a chapter."
+            "What would be a chapter title in your autobiography? Write a brief plot arch or outline of the chapter.",
+            "What did you learn this week?",
+            "What are you grateful for today?",
+            "What didn't happen when you woke up today?"
         ];
-
-        // Prompt shuffling system
-        let promptPool = [];
-        let promptIndex = 0;
-
-        function shufflePrompts() {
-            promptPool = [...prompts];
-            for (let i = promptPool.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [promptPool[i], promptPool[j]] = [promptPool[j], promptPool[i]];
-            }
-            promptIndex = 0;
-        }
-
-        // Initialize shuffled prompt pool
-        shufflePrompts();
 
         const editor = document.getElementById('editor');
         const editorContainer = document.querySelector('.editor-container');
         const bgImage = document.getElementById('bgImage');
         const wordCountEl = document.getElementById('wordCount');
         const promptDisplay = document.getElementById('promptDisplay');
-        const promptClose = document.getElementById('promptClose');
         const ideasPanel = document.getElementById('ideasPanel');
         const ideaInput = document.getElementById('ideaInput');
         const searchInput = document.getElementById('searchInput');
@@ -1717,10 +1681,15 @@ function init() {
         // Manual text is now loaded from manual.js
 
         function ensureManualProject() {
-            // Check if manual project exists
-            const manualExists = projects.some(p => p.id === 1 && p.type === 'project');
+            // Find manual project
+            const manualIndex = projects.findIndex(p => p.id === 1 && p.type === 'project');
 
-            if (!manualExists) {
+            if (manualIndex !== -1) {
+                // Update existing manual with latest text from manual.js
+                projects[manualIndex].text = MANUAL_TEXT;
+                console.log('✓ Updated manual project text');
+                saveProjects();
+            } else {
                 // Create manual project with fixed ID = 1
                 const manualProject = {
                     id: 1,
@@ -2665,38 +2634,14 @@ function init() {
         }
 
         function showPrompt() {
-            // Get next prompt from shuffled pool
-            const nextPrompt = promptPool[promptIndex];
-            promptIndex++;
-
-            // If we've shown all prompts, reshuffle and start over
-            if (promptIndex >= promptPool.length) {
-                shufflePrompts();
-            }
-
-            // Set text content while preserving the close button
-            const textNode = promptDisplay.firstChild;
-            if (textNode && textNode.nodeType === Node.TEXT_NODE) {
-                textNode.textContent = nextPrompt;
-            } else {
-                promptDisplay.insertBefore(document.createTextNode(nextPrompt), promptDisplay.firstChild);
-            }
+            const randomPrompt = prompts[Math.floor(Math.random() * prompts.length)];
+            promptDisplay.textContent = randomPrompt;
             promptDisplay.classList.add('visible');
+            
+            setTimeout(() => {
+                promptDisplay.classList.remove('visible');
+            }, 5000);
         }
-
-        function closePrompt() {
-            promptDisplay.classList.remove('visible');
-        }
-
-        // Close prompt on click
-        promptClose.addEventListener('click', closePrompt);
-
-        // Close prompt on ESC key
-        document.addEventListener('keydown', function(e) {
-            if (e.key === 'Escape' && promptDisplay.classList.contains('visible')) {
-                closePrompt();
-            }
-        });
 
         function toggleExportMenu() {
             exportMenuOpen = !exportMenuOpen;
@@ -2705,23 +2650,10 @@ function init() {
 
         function exportAs(format) {
             const text = editor.value;
-            const project = getCurrentProject();
-
+            const filename = `writing-${new Date().toISOString().split('T')[0]}`;
+            
             toggleExportMenu();
 
-            // Use project name if available, otherwise prompt for filename
-            if (project && project.name) {
-                performExport(format, text, project.name);
-            } else {
-                showCustomPrompt('Export filename', function(filename) {
-                    if (filename && filename.trim()) {
-                        performExport(format, text, filename.trim());
-                    }
-                });
-            }
-        }
-
-        function performExport(format, text, filename) {
             switch(format) {
                 case 'txt':
                     exportTXT(text, filename);
