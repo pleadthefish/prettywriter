@@ -1,11 +1,11 @@
-const MANUAL_TEXT = `═══════════════════════════════════════════════════════════════════════════════
+═══════════════════════════════════════════════════════════════════════════════
                            P R E T T Y W R I T E R
                               U S E R   M A N U A L
 ═══════════════════════════════════════════════════════════════════════════════
 
-Welcome to PrettyWriter, a minimalist writing environment inspired by composing on analog typewriters. Typewriters are fun, tactile, dedicated writing tools. They inspire a desire to use them--a desire to write. It's just you, the machine, and the page. A typewriter engages your attention on your writing in a way a computer cannot.
+Welcome to PrettyWriter, a minimalist writing environment inspired by composing on analog typewriters. Typewriters are fun, tactile, dedicated writing tools. They inspire a desire to use them--a desire to write. It's just you, the machine, and the page. A typewriter engages your attention on your writing in a way a computer cannot. In the end, somehow, what you write feels more original. Or, at least, the writing experience was more special. 
 
-In the end, somehow, what you write feels more original. Or, at least, the writing experience was more special. A digital approximation of these phenomena is the goal of PrettyWriter.
+A digital approximation of these phenomena is the goal of PrettyWriter.
 
 ═══════════════════════════════════════════════════════════════════════════════
 KEYBOARD SHORTCUTS
@@ -103,7 +103,7 @@ PrettyWriter backgrounds are original film photography to enhance immersion. Plu
 ═══════════════════════════════════════════════════════════════════════════════
 FOR TESTERS
 ═══════════════════════════════════════════════════════════════════════════════
-Let me know what you like and what you don't!
+Let me know what you like and what you don't! 
 Link to feedback form: https://forms.gle/CPZp7xWGc5zJiFbFA (did you try and click it??)
 
 YOUR DATA
@@ -132,4 +132,3 @@ TIPS FOR FOCUSED WRITING
 ═══════════════════════════════════════════════════════════════════════════════
 You're all set. Double-tap Esc to open the Projects Panel and Press N to open your first project.
 ═══════════════════════════════════════════════════════════════════════════════
-`;

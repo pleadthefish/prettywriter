@@ -1117,7 +1117,6 @@
         </div>
     </div>
 
-    <script src="manual.js"></script>
     <script>
         const backgrounds = [
             { url: './images/photo1.jpg', photographer: 'Drew Parrish' },
@@ -1214,7 +1213,7 @@ let projectHistory = []; // Array of {projectId, timestamp, projectName}
 let historyPanelOpen = false;
 let selectedHistoryIndex = 0;
 
-function init() {
+async function init() {
     try {
         console.log('=== INIT START ===');
 
@@ -1227,7 +1226,7 @@ function init() {
 
         const isFirstTime = !localStorage.getItem('hasVisited');
 
-        loadProjects();  // was: loadprojects (lowercase p)
+        await loadProjects();  // Now async - waits for manual.txt to load
         console.log('After loadProjects, projects.length:', projects.length);  // was: lenghth
 
         if (projects.length === 1 && projects[0].id === 1) {
@@ -1830,7 +1829,7 @@ function init() {
 
         // === PROJECTS SYSTEM ===
 
-        function loadProjects() {
+        async function loadProjects() {
             try {
                 const saved = localStorage.getItem('projects');
                 console.log('loadProjects - raw saved:', saved ? 'DATA EXISTS' : 'NO DATA');
@@ -1849,8 +1848,8 @@ function init() {
                     console.log('No saved projects');
                 }
 
-                // Ensure manual project exists
-                ensureManualProject();
+                // Ensure manual project exists (now async)
+                await ensureManualProject();
 
                 const savedCurrentId = localStorage.getItem('currentProjectId');
                 if (savedCurrentId && savedCurrentId !== 'null') {
@@ -1876,15 +1875,31 @@ function init() {
             }
         }
 
-        // Manual text is now loaded from manual.js
+        // Manual text is now loaded from User Manual/manual.txt
 
-        function ensureManualProject() {
+        async function ensureManualProject() {
+            // Fetch manual text from file
+            let manualText = '';
+            try {
+                const response = await fetch('./User Manual/manual.txt');
+                if (response.ok) {
+                    manualText = await response.text();
+                    console.log('✓ Fetched manual text from file');
+                } else {
+                    console.warn('⚠ Could not fetch manual.txt, using fallback');
+                    manualText = 'User Manual\n\nThe manual could not be loaded. Please check that the User Manual folder exists.';
+                }
+            } catch (error) {
+                console.error('❌ Error fetching manual:', error);
+                manualText = 'User Manual\n\nThe manual could not be loaded. Please check that the User Manual folder exists.';
+            }
+
             // Find manual project
             const manualIndex = projects.findIndex(p => p.id === 1 && p.type === 'project');
 
             if (manualIndex !== -1) {
-                // Update existing manual with latest text from manual.js
-                projects[manualIndex].text = MANUAL_TEXT;
+                // Update existing manual with latest text from file
+                projects[manualIndex].text = manualText;
                 projects[manualIndex].textSize = 'small';
                 projects[manualIndex].font = 'Courier New';
                 console.log('✓ Updated manual project text');
@@ -1895,7 +1910,7 @@ function init() {
                     id: 1,
                     name: 'User Manual',
                     type: 'project',
-                    text: MANUAL_TEXT,
+                    text: manualText,
                     ideas: [],
                     backgroundIndex: 0,
                     textSize: 'small',
