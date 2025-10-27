@@ -932,6 +932,356 @@
             padding-right: 30px;
         }
 
+        /* PRINT SHOP STYLES */
+        .photo-credit-container {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 20px;
+        }
+
+        .order-print-btn {
+            background: rgba(20, 20, 20, 0.85);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 6px;
+            padding: 8px 12px;
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 11px;
+            font-family: 'Georgia', serif;
+            cursor: pointer;
+            opacity: 0;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            display: block;
+            text-align: center;
+            white-space: nowrap;
+            margin-bottom: 17px;
+        }
+
+        .photo-credit-container:hover .order-print-btn {
+            opacity: 1;
+        }
+
+        .order-print-btn:hover {
+            background: rgba(30, 30, 30, 0.95);
+            border-color: rgba(255, 255, 255, 0.4);
+        }
+
+        .print-shop-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.92);
+            backdrop-filter: blur(10px);
+            z-index: 10000;
+            display: none;
+            overflow-y: auto;
+            padding: 60px 20px 40px 20px;
+        }
+
+        .print-shop-modal.visible {
+            display: block;
+        }
+
+        .print-shop-content {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            position: relative;
+        }
+
+        .print-shop-close {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 24px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            line-height: 1;
+        }
+
+        .print-shop-close:hover {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: rgba(255, 255, 255, 0.4);
+        }
+
+        .print-shop-title {
+            font-size: 24px;
+            color: rgba(255, 255, 255, 0.9);
+            font-weight: normal;
+            margin-bottom: 30px;
+            text-align: center;
+            font-family: 'Georgia', serif;
+        }
+
+        .back-btn {
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 6px;
+            padding: 10px 16px;
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 13px;
+            font-family: 'Georgia', serif;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+        }
+
+        .back-btn:hover {
+            background: rgba(255, 255, 255, 0.15);
+            border-color: rgba(255, 255, 255, 0.4);
+        }
+
+        .photo-gallery {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            padding: 10px;
+            width: 100%;
+        }
+
+        .photo-gallery-item {
+            position: relative;
+            aspect-ratio: 3/2;
+            border-radius: 8px;
+            overflow: hidden;
+            cursor: pointer;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .photo-gallery-item:hover {
+            transform: scale(1.03);
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+
+        .photo-gallery-item.current {
+            border-color: #6b9bd1;
+            border-width: 3px;
+        }
+
+        .photo-gallery-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: all 0.3s ease;
+        }
+
+        .photo-gallery-item:hover img {
+            filter: brightness(1.1);
+        }
+
+        .photo-number {
+            position: absolute;
+            bottom: 10px;
+            left: 10px;
+            background: rgba(0, 0, 0, 0.7);
+            color: rgba(255, 255, 255, 0.9);
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-family: 'Georgia', serif;
+        }
+
+        .size-selector-layout {
+            display: flex;
+            gap: 40px;
+            align-items: flex-start;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .selected-photo-preview {
+            flex: 1;
+            max-width: 600px;
+            min-width: 300px;
+        }
+
+        .selected-photo-preview img {
+            width: 100%;
+            height: auto;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .selected-photo-preview img:hover {
+            border-color: rgba(255, 255, 255, 0.4);
+            transform: scale(1.02);
+        }
+
+        .selected-photo-credit {
+            margin-top: 12px;
+            text-align: center;
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 12px;
+            font-family: 'Georgia', serif;
+        }
+
+        .size-options {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            min-width: 250px;
+        }
+
+        .size-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+
+        .size-card:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(255, 255, 255, 0.4);
+            transform: translateY(-2px);
+        }
+
+        .size-card.selected {
+            border-color: #6b9bd1;
+            background: rgba(107, 155, 209, 0.1);
+        }
+
+        .size-dimensions {
+            font-size: 20px;
+            color: rgba(255, 255, 255, 0.9);
+            margin-bottom: 8px;
+            font-family: 'Georgia', serif;
+        }
+
+        .size-price {
+            font-size: 24px;
+            color: #6b9bd1;
+            margin-bottom: 16px;
+            font-weight: bold;
+        }
+
+        .size-select-btn {
+            background: rgba(107, 155, 209, 0.2);
+            border: 1px solid rgba(107, 155, 209, 0.4);
+            border-radius: 6px;
+            padding: 10px 24px;
+            color: #6b9bd1;
+            font-size: 13px;
+            font-family: 'Georgia', serif;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+        }
+
+        .size-select-btn:hover {
+            background: rgba(107, 155, 209, 0.3);
+            border-color: rgba(107, 155, 209, 0.6);
+        }
+
+        /* PHOTO LIGHTBOX */
+        .photo-lightbox {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            z-index: 20000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            padding: 40px;
+        }
+
+        .photo-lightbox.visible {
+            display: flex;
+        }
+
+        .lightbox-close {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 24px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            line-height: 1;
+            z-index: 20001;
+        }
+
+        .lightbox-close:hover {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: rgba(255, 255, 255, 0.4);
+        }
+
+        .photo-lightbox img {
+            max-width: 90%;
+            max-height: 90%;
+            object-fit: contain;
+            border-radius: 4px;
+            cursor: default;
+        }
+
+        /* Mobile responsive */
+        @media (max-width: 768px) {
+            .photo-gallery {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 15px;
+            }
+
+            .size-selector-layout {
+                flex-direction: column;
+            }
+
+            .print-shop-title {
+                font-size: 20px;
+            }
+
+            .photo-lightbox {
+                padding: 20px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .photo-gallery {
+                grid-template-columns: 1fr;
+                gap: 12px;
+            }
+
+            .print-shop-modal {
+                padding: 20px 10px;
+            }
+
+            .photo-lightbox {
+                padding: 10px;
+            }
+        }
+
         .folder-select:focus {
             outline: none;
             border-color: rgba(255, 255, 255, 0.25);
@@ -995,7 +1345,10 @@
     </div>
 
     <!-- PHOTO CREDIT -->
-    <div class="photo-credit">Photo © 2025 Drew Parrish</div>
+    <div class="photo-credit-container">
+        <button class="order-print-btn" onclick="openPrintShop()">Order Print</button>
+        <div class="photo-credit">Photo © 2025 Drew Parrish</div>
+    </div>
 
     <!-- PROJECTS PANEL -->
     <div class="projects-panel" id="projectsPanel">
@@ -1115,6 +1468,58 @@
                 <button class="primary" onclick="confirmPrompt()">Create</button>
             </div>
         </div>
+    </div>
+
+    <!-- PRINT SHOP MODAL -->
+    <div class="print-shop-modal" id="printShopModal">
+        <div class="print-shop-content">
+            <button class="print-shop-close" onclick="closePrintShop()">×</button>
+
+            <!-- GALLERY VIEW -->
+            <div class="print-shop-view" id="galleryView">
+                <h2 class="print-shop-title">Select a Photo</h2>
+                <div class="photo-gallery" id="photoGallery">
+                    <!-- Photos will be dynamically generated -->
+                </div>
+            </div>
+
+            <!-- SIZE SELECTOR VIEW -->
+            <div class="print-shop-view" id="sizeView" style="display: none;">
+                <button class="back-btn" onclick="showGalleryView()">← Back to Gallery</button>
+                <h2 class="print-shop-title">Choose Print Size</h2>
+
+                <div class="size-selector-layout">
+                    <div class="selected-photo-preview">
+                        <img id="selectedPhotoImg" src="" alt="Selected photo" onclick="openLightbox(event)">
+                        <div class="selected-photo-credit">© 2025 Drew Parrish · 35mm Film</div>
+                    </div>
+
+                    <div class="size-options">
+                        <div class="size-card" onclick="selectSize(8, 10, 25)">
+                            <div class="size-dimensions">8×10"</div>
+                            <div class="size-price">$25</div>
+                            <button class="size-select-btn">Select</button>
+                        </div>
+                        <div class="size-card" onclick="selectSize(11, 14, 40)">
+                            <div class="size-dimensions">11×14"</div>
+                            <div class="size-price">$40</div>
+                            <button class="size-select-btn">Select</button>
+                        </div>
+                        <div class="size-card" onclick="selectSize(16, 20, 65)">
+                            <div class="size-dimensions">16×20"</div>
+                            <div class="size-price">$65</div>
+                            <button class="size-select-btn">Select</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- PHOTO LIGHTBOX -->
+    <div class="photo-lightbox" id="photoLightbox" onclick="closeLightbox()">
+        <button class="lightbox-close" onclick="closeLightbox()">×</button>
+        <img id="lightboxImg" src="" alt="Enlarged photo">
     </div>
 
     <script>
@@ -1462,7 +1867,13 @@ async function init() {
                     
                     // Single Escape - close whatever is open
                     e.preventDefault();
-                    if (exportMenuOpen) {
+                    const photoLightbox = document.getElementById('photoLightbox');
+                    const printShopModal = document.getElementById('printShopModal');
+                    if (photoLightbox && photoLightbox.classList.contains('visible')) {
+                        closeLightbox();
+                    } else if (printShopModal && printShopModal.classList.contains('visible')) {
+                        closePrintShop();
+                    } else if (exportMenuOpen) {
                         toggleExportMenu();
                     } else if (ideasPanel.classList.contains('open')) {
                         toggleIdeas();
@@ -2854,6 +3265,132 @@ async function init() {
                 photoCreditEl.textContent = `Photo © 2025 ${bg.photographer}`;
                 photoCreditEl.style.opacity = '0.6';
             }, 150);
+        }
+
+        // === PRINT SHOP FUNCTIONS ===
+
+        let selectedPhotoIndex = 0;
+
+        function openPrintShop() {
+            const modal = document.getElementById('printShopModal');
+            const galleryView = document.getElementById('galleryView');
+            const sizeView = document.getElementById('sizeView');
+
+            // Pre-select current background
+            selectedPhotoIndex = currentBgIndex;
+
+            // Generate gallery if empty
+            const gallery = document.getElementById('photoGallery');
+            if (gallery.children.length === 0) {
+                backgrounds.forEach((bg, index) => {
+                    const item = document.createElement('div');
+                    item.className = 'photo-gallery-item';
+                    if (index === currentBgIndex) {
+                        item.classList.add('current');
+                    }
+                    item.onclick = () => selectPhoto(index);
+
+                    const img = document.createElement('img');
+                    img.src = bg.url;
+                    img.alt = `Photo ${index + 1}`;
+
+                    const number = document.createElement('div');
+                    number.className = 'photo-number';
+                    number.textContent = `Photo ${index + 1}`;
+
+                    item.appendChild(img);
+                    item.appendChild(number);
+                    gallery.appendChild(item);
+                });
+            } else {
+                // Update current border
+                const items = gallery.querySelectorAll('.photo-gallery-item');
+                items.forEach((item, index) => {
+                    if (index === currentBgIndex) {
+                        item.classList.add('current');
+                    } else {
+                        item.classList.remove('current');
+                    }
+                });
+            }
+
+            // Show gallery view
+            galleryView.style.display = 'block';
+            sizeView.style.display = 'none';
+
+            modal.classList.add('visible');
+        }
+
+        function closePrintShop() {
+            const modal = document.getElementById('printShopModal');
+            modal.classList.remove('visible');
+        }
+
+        function selectPhoto(index) {
+            selectedPhotoIndex = index;
+            const bg = backgrounds[index];
+
+            // Update selected photo preview
+            const img = document.getElementById('selectedPhotoImg');
+            img.src = bg.url;
+
+            // Switch to size view
+            document.getElementById('galleryView').style.display = 'none';
+            document.getElementById('sizeView').style.display = 'block';
+        }
+
+        function showGalleryView() {
+            document.getElementById('galleryView').style.display = 'block';
+            document.getElementById('sizeView').style.display = 'none';
+        }
+
+        function selectSize(width, height, price) {
+            // PRINTFUL API PLACEHOLDER
+            // This is where the Printful API integration will go
+            // Expected flow:
+            // 1. Create Printful product with selected photo
+            // 2. Add to cart with specified size
+            // 3. Redirect to checkout
+
+            const photoNumber = selectedPhotoIndex + 1;
+            const sizeStr = `${width}×${height}"`;
+
+            console.log(`Print Order Request:
+  Photo: ${photoNumber} (${backgrounds[selectedPhotoIndex].url})
+  Size: ${sizeStr}
+  Price: $${price}
+  Photographer: Drew Parrish
+  Medium: 35mm Film
+            `);
+
+            // Temporary alert for MVP
+            alert(`Print ordering coming soon!\n\nPhoto ${photoNumber} · ${sizeStr} · $${price}\n\nFollow @prettywriter for updates.`);
+
+            // Future: Backend endpoint call
+            // fetch('/api/printful/create-order', {
+            //     method: 'POST',
+            //     body: JSON.stringify({
+            //         photoIndex: selectedPhotoIndex,
+            //         size: { width, height },
+            //         price
+            //     })
+            // }).then(response => response.json())
+            //   .then(data => window.location.href = data.checkoutUrl);
+        }
+
+        function openLightbox(event) {
+            event.stopPropagation(); // Prevent event bubbling
+            const lightbox = document.getElementById('photoLightbox');
+            const lightboxImg = document.getElementById('lightboxImg');
+            const selectedImg = document.getElementById('selectedPhotoImg');
+
+            lightboxImg.src = selectedImg.src;
+            lightbox.classList.add('visible');
+        }
+
+        function closeLightbox() {
+            const lightbox = document.getElementById('photoLightbox');
+            lightbox.classList.remove('visible');
         }
 
         function showPrompt() {
