@@ -13,15 +13,15 @@ Always use the same browser/device to access your projects.
 
 ## Features
 
-- **Keyboard-first workflow** - Navigate entirely with shortcuts
-- **Projects & folders** - Organize your writing
-- **Ideas & notes panel** - Capture thoughts without losing focus
+- **Keyboard-first workflow** - Navigate primarily with shortcuts
+- **Projects & folders** - Simple organization to your writing
+- **Ideas & notes panel** - Capture thoughts without losing focus. Promotes Rhizomatic thinking. 
 - **Hashtag system** - Tag and filter ideas across projects
 - **Multiple fonts** - Georgia, Traveling Typewriter, Drafting Mono, Times New Roman, Courier New
-- **Background images** - Set the mood for your writing
+- **Background images** - Immerse in the writing environment with original film photography backgrounds
 - **Typing sound effects** - Optional typewriter sounds
 - **Export** - Save as .txt, .md, or .html
-- **Writing prompts** - Get unstuck with random prompts
+- **Writing prompts** - Get inspired with random prompts
 - **Project history** - Quickly return to recent work
 
 ## Keyboard Shortcuts
