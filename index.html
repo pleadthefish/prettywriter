@@ -328,7 +328,26 @@
             z-index: 10;
             color: rgba(255, 255, 255, 0.3);
             font-size: 13px;
-            pointer-events: none;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+
+        .project-title:hover {
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .project-title-input {
+            position: fixed;
+            top: 42px;
+            left: 20px;
+            z-index: 10;
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 13px;
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            padding: 2px 6px;
+            border-radius: 3px;
+            outline: none;
         }
 
         .shortcuts-hint {
@@ -1696,6 +1715,7 @@ async function init() {
         renderGlobalIdeas();
         renderProjects();
         updateProjectTitle();
+        setupProjectTitleEditing();
         setupKeyboardShortcuts();
         setupTypingSounds();
         loadSoundPreference();
@@ -2397,6 +2417,75 @@ async function init() {
             if (titleEl && project) {
                 titleEl.textContent = project.name || 'Untitled';
             }
+        }
+
+        function setupProjectTitleEditing() {
+            const titleEl = document.getElementById('projectTitle');
+            if (!titleEl) return;
+
+            titleEl.addEventListener('click', function() {
+                const project = getCurrentProject();
+                if (!project) return;
+
+                // Prevent editing the User Manual
+                if (project.id === 1) {
+                    alert('The User Manual cannot be renamed.');
+                    return;
+                }
+
+                // Create input field
+                const input = document.createElement('input');
+                input.type = 'text';
+                input.className = 'project-title-input';
+                input.value = project.name || 'Untitled';
+
+                // Position input where the title was
+                titleEl.style.display = 'none';
+                titleEl.parentNode.insertBefore(input, titleEl.nextSibling);
+
+                // Focus and select text
+                input.focus();
+                input.select();
+
+                // Function to save and restore
+                function saveAndRestore() {
+                    const newName = input.value.trim();
+                    if (newName && newName !== project.name) {
+                        project.name = newName;
+                        saveProjects();
+                        updateProjectTitle();
+                        renderProjects(); // Update projects list if open
+
+                        // Update history with new name
+                        const historyEntry = projectHistory.find(h => h.projectId === project.id);
+                        if (historyEntry) {
+                            historyEntry.projectName = newName;
+                            localStorage.setItem('projectHistory', JSON.stringify(projectHistory));
+                        }
+                    }
+
+                    // Remove input and show title again
+                    input.remove();
+                    titleEl.style.display = '';
+                }
+
+                // Save on Enter key
+                input.addEventListener('keydown', function(e) {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        saveAndRestore();
+                    } else if (e.key === 'Escape') {
+                        // Cancel on Escape
+                        input.remove();
+                        titleEl.style.display = '';
+                    }
+                });
+
+                // Save on blur (clicking away)
+                input.addEventListener('blur', function() {
+                    saveAndRestore();
+                });
+            });
         }
 
         function addToHistory(projectId) {
