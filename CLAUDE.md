@@ -1,0 +1,137 @@
+# CLAUDE.md
+
+Guidance for Claude Code (and any developer) working in this repo.
+
+## What this is
+
+PrettyWriter is a minimalist, typewriter-inspired writing app that runs entirely
+in the browser. Keyboard-first, no formatting toolbar, original 35mm film
+photography as backgrounds. No backend, no build step, no accounts — all data
+lives in the browser's `localStorage`.
+
+## Running it
+
+Serve the folder over HTTP — do **not** open `index.html` via `file://`:
+
+```sh
+python3 -m http.server 8000   # then open http://localhost:8000
+```
+
+The User Manual is loaded with `fetch('./User Manual/manual.txt')`, which
+browsers block under `file://` (you'll see the fallback "could not be loaded" text).
+
+There are no tests, linters, or package dependencies.
+
+## Repo layout
+
+```
+index.html               The entire app: CSS, markup, and JS in one file
+User Manual/manual.txt   Manual text, loaded into the pinned "User Manual" project
+images/photo1-13.jpg     Background photos (© Drew Parrish, NOT MIT — see CONTENT-LICENSE.txt)
+typefaces/               Traveling Typewriter + Drafting Mono (.ttf)
+README.md                Public-facing overview and shortcut list
+LICENSE                  MIT (code)
+CONTENT-LICENSE.txt      All rights reserved (photography)
+```
+
+`PrettyWriter.zip` in the working dir is an old (Oct 2025) git-ignored snapshot.
+
+## Map of index.html
+
+Line numbers are approximate — grep for the function name.
+
+| Section | ~Lines |
+|---|---|
+| `<style>` | 7–1327 |
+| `marked.js` CDN script (only external dependency) | 1328 |
+| HTML markup (editor, panels, modals, print shop) | 1329–1543 |
+| `<script>` — app logic | 1544–3895 |
+
+Key areas in the script, by feature:
+
+- **Data / config:** `backgrounds` array, `prompts` array, `textSizes`, `fonts`
+- **Startup:** `init()` → `loadProjects()` → `ensureManualProject()`, then setup calls
+- **Keyboard:** `setupKeyboardShortcuts()` — the single global keydown handler
+- **Sound:** `initAudio()`, `playTypeSound()` — synthesized with Web Audio (no audio files)
+- **Fonts / size:** `cycleFont()`, `applyFont()`, `increaseTextSize()`, `applyTextSize()`
+- **Projects tree:** `loadProjects()`, `saveProjects()`, `createNewProject()`,
+  `createNewFolder()`, `renderProjects()`, `handleProjectsKeyboard()`, drag-and-drop handlers
+- **Title editing:** `setupProjectTitleEditing()` — click title to rename inline
+- **History:** `addToHistory()`, `renderHistory()`, `handleHistoryKeyboard()`
+- **Saving:** `manualSave()` (⌘S), `saveCurrentProject()` (autosave on input)
+- **Backgrounds:** `changeBackground()`
+- **Print shop:** `openPrintShop()`, `selectPhoto()`, `selectSize()`, lightbox functions
+- **Export:** `exportAs()`, `exportTXT()`, `exportMarkdown()`, `exportHTML()`, `downloadBlob()`
+- **Markdown preview:** `renderMarkdown()`, `togglePreview()` (Ctrl+M)
+- **Ideas panel:** `addIdea()`, `renderIdeas()`, hashtag functions, `renderGlobalIdeas()`
+
+## Data model
+
+`localStorage` keys:
+
+| Key | Contents |
+|---|---|
+| `projects` | JSON tree of projects and folders |
+| `currentProjectId` | id of the open project |
+| `projectHistory` | JSON array of `{projectId, timestamp, projectName}` |
+| `textSize` | `small` / `medium` / `large` |
+| `soundEnabled` | `true` / `false` |
+| `hasVisited` | first-visit flag (opens the manual) |
+
+Project:
+```js
+{ id, name, type: 'project', text, ideas: [], backgroundIndex, textSize, font, created, pinned? }
+```
+Folder:
+```js
+{ id, name, type: 'folder', expanded, children: [], created }
+```
+Idea:
+```js
+{ id, text, timestamp }
+```
+
+IDs are `Date.now()`. **id `1` is reserved for the User Manual project** — it is
+pinned, can't be renamed, and its text is **overwritten from `manual.txt` on every
+page load** (so edits users make to it are not kept).
+
+## Conventions
+
+- **Keep it one file.** No build step, no framework, no npm. Vanilla JS + CSS.
+- **Keyboard-first.** New features should have a shortcut; mouse-only features are
+  the exception (print shop, title rename).
+- **Minimal formatting is intentional.** Don't add rich-text features without asking.
+- **Match existing style:** 4-space indent, `function` declarations, `// === SECTION ===`
+  banners, DOM refs held in top-level consts.
+- **Changing shortcuts?** Update all four places together: `setupKeyboardShortcuts()`,
+  the `.shortcuts-hint` bar in the markup, `README.md`, and `User Manual/manual.txt`.
+- **Adding a photo:** drop it in `images/` and add an entry to the `backgrounds` array.
+- **Photos are not MIT.** Never suggest redistributing them; forks should bring their own.
+
+## Known gotchas
+
+- `handleProjectClick` is defined twice; the later definition (with `event`) wins.
+- Title editing: removing the input may fire `blur`, so Escape/Enter can trigger
+  `saveAndRestore()` unexpectedly — verify behavior when touching it.
+- `exportHTML()` does not HTML-escape user text.
+- `showPrompt()` uses plain `Math.random()`; the "no repeats until full cycle"
+  behavior described in commit 2dc1089 is not present in the current code.
+- ⌘⇧P also toggles Projects and still has debug `console.log`s.
+- All 13 backgrounds (~3–5 MB each) are preloaded at startup.
+
+## Current work in progress
+
+**Print shop (Printful integration).** UI is complete: hover the photo credit →
+"Order Print" → gallery → size selection (8×10 $25, 11×14 $40, 16×20 $65) →
+lightbox. `selectSize()` is a stub that logs and alerts "coming soon"; a
+commented-out `fetch('/api/printful/create-order')` marks the intended hook.
+
+Open decisions:
+- Backend for the Printful API key (serverless function — key must never ship client-side)
+- Checkout: own Stripe + Printful vs. linking to a Printful-connected storefront
+- Print-resolution source files (separate from the web backgrounds)
+
+## Git
+
+- Work on `main` is fine for small changes; commit messages are descriptive,
+  feature-level summaries.
