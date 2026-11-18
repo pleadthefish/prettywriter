@@ -14,6 +14,7 @@ Always use the same browser/device to access your projects.
 ## Features
 
 - **Keyboard-first workflow** - Navigate primarily with shortcuts
+- **Live Markdown** - Markdown renders as you write; the symbols show only on the line you're editing, and your text is saved exactly as typed
 - **Projects & folders** - Simple organization to your writing
 - **Ideas & notes panel** - Capture thoughts without losing focus. Promotes Rhizomatic thinking. 
 - **Hashtag system** - Tag and filter ideas across projects
@@ -44,6 +45,7 @@ Always use the same browser/device to access your projects.
 - `⌘[` - Previous font
 - `⌘.` - Increase text size
 - `⌘,` - Decrease text size
+- `⌘`-click - Open a link
 
 ## Getting Started
 
