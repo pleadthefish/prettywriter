@@ -202,6 +202,27 @@
             width: 0.8em;
         }
 
+        .cm-editor .cm-md-image-wrap {
+            display: block;
+            margin: 0.5em 0;
+        }
+
+        .cm-editor .cm-md-image {
+            display: block;
+            max-width: 100%;
+            height: auto;
+            margin: 0 auto;
+        }
+
+        .cm-editor .cm-md-image-missing {
+            display: inline-block;
+            font-size: 0.8em;
+            color: rgba(255, 255, 255, 0.5);
+            border: 1px dashed rgba(255, 255, 255, 0.3);
+            border-radius: 3px;
+            padding: 0 8px;
+        }
+
         .cm-editor .cm-md-hr {
             display: inline-block;
             width: 100%;
@@ -1789,6 +1810,35 @@
                 ignoreEvent() { return false; }
             }
 
+            class ImageWidget extends WidgetType {
+                constructor(src, alt) {
+                    super();
+                    this.src = src; this.alt = alt;
+                }
+                eq(other) { return other.src === this.src && other.alt === this.alt; }
+                toDOM(view) {
+                    const wrap = document.createElement('span');
+                    wrap.className = 'cm-md-image-wrap';
+                    const img = document.createElement('img');
+                    img.className = 'cm-md-image';
+                    img.alt = this.alt;
+                    img.loading = 'lazy';
+                    img.src = this.src;
+                    const alt = this.alt;
+                    img.addEventListener('load', function() { view.requestMeasure(); });
+                    img.addEventListener('error', function() {
+                        const missing = document.createElement('span');
+                        missing.className = 'cm-md-image-missing';
+                        missing.textContent = alt || 'image unavailable';
+                        img.replaceWith(missing);
+                        view.requestMeasure();
+                    });
+                    wrap.appendChild(img);
+                    return wrap;
+                }
+                ignoreEvent() { return false; }
+            }
+
             class RuleWidget extends WidgetType {
                 eq() { return true; }
                 toDOM() {
@@ -1877,6 +1927,9 @@
                             } else if (name === 'Link') {
                                 decorateLink(node.node, isActive(f));
                                 return false;
+                            } else if (name === 'Image') {
+                                decorateImage(node.node, isActive(f));
+                                return false;
                             } else if (name === 'URL' && parent !== 'Image') {
                                 const url = doc.sliceString(f, t);
                                 if (url.length > BARE_URL_SHORTEN_AT && !isActive(f)) {
@@ -1908,6 +1961,19 @@
                         inner = inner.nextSibling;
                     }
                 }
+                // ![alt](src) — off the cursor line the image replaces its source;
+                // on the cursor line the source stays editable with the image after it
+                function decorateImage(image, isOnCursor) {
+                    const urlNode = image.getChild('URL');
+                    if (!urlNode) return;
+                    const marks = [];
+                    let c = image.firstChild;
+                    while (c) { if (c.name === 'LinkMark') marks.push(c); c = c.nextSibling; }
+                    const alt = marks.length >= 2 ? doc.sliceString(marks[0].to, marks[1].from) : '';
+                    const widget = new ImageWidget(doc.sliceString(urlNode.from, urlNode.to), alt);
+                    if (isOnCursor) out.push(Decoration.widget({ widget: widget, side: 1 }).range(image.to));
+                    else add(image.from, image.to, Decoration.replace({ widget: widget }));
+                }
                 function hideInner(n) {
                     if (n.name === 'EmphasisMark' || n.name === 'StrikethroughMark' || n.name === 'CodeMark') add(n.from, n.to, hide);
                     if (n.name === 'StrongEmphasis') add(n.from, n.to, mark('cm-md-strong'));
@@ -1919,7 +1985,21 @@
                 return Decoration.set(out, true);
             }
 
-            return ViewPlugin.fromClass(class {
+            // ⌘-click (Ctrl-click elsewhere) opens a link; a plain click just places the cursor
+            const linkClicks = CM.view.EditorView.domEventHandlers({
+                mousedown: function(e) {
+                    if (!(e.metaKey || e.ctrlKey) || e.button !== 0) return false;
+                    const el = e.target.closest && e.target.closest('[data-href]');
+                    if (!el) return false;
+                    const href = el.dataset.href;
+                    if (!/^(https?:|mailto:)/i.test(href)) return false;
+                    e.preventDefault();
+                    window.open(href, '_blank', 'noopener');
+                    return true;
+                }
+            });
+
+            return [linkClicks, ViewPlugin.fromClass(class {
                 constructor(view) { this.decorations = build(view); }
                 update(u) {
                     if (u.docChanged || u.viewportChanged || u.selectionSet ||
@@ -1927,7 +2007,7 @@
                         this.decorations = build(u.view);
                     }
                 }
-            }, { decorations: function(v) { return v.decorations; } });
+            }, { decorations: function(v) { return v.decorations; } })];
         }
 
         function createEditorState(text) {
