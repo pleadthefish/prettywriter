@@ -145,6 +145,70 @@
             background: rgba(255, 255, 255, 0.28);
         }
 
+        /* LIVE PREVIEW — Markdown styled in place (see buildLivePreview) */
+        .cm-editor .cm-md-h1,
+        .cm-editor .cm-md-h2,
+        .cm-editor .cm-md-h3,
+        .cm-editor .cm-md-h4,
+        .cm-editor .cm-md-h5,
+        .cm-editor .cm-md-h6 {
+            font-weight: bold;
+            line-height: 1.3;
+            padding-top: 0.3em;
+            padding-bottom: 0.15em;
+        }
+
+        .cm-editor .cm-md-h1 { font-size: 2em; }
+        .cm-editor .cm-md-h2 { font-size: 1.5em; }
+        .cm-editor .cm-md-h3 { font-size: 1.25em; }
+        .cm-editor .cm-md-h4,
+        .cm-editor .cm-md-h5,
+        .cm-editor .cm-md-h6 { font-size: 1.1em; }
+
+        .cm-editor .cm-md-strong { font-weight: bold; }
+        .cm-editor .cm-md-em { font-style: italic; }
+        .cm-editor .cm-md-strike { text-decoration: line-through; }
+
+        .cm-editor .cm-md-code {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+        }
+
+        .cm-editor .cm-md-codeblock {
+            background: rgba(255, 255, 255, 0.06);
+            font-family: 'Courier New', monospace;
+            font-size: 0.85em;
+            line-height: 1.6;
+            padding: 0 16px;
+        }
+
+        .cm-editor .cm-md-quote {
+            border-left: 4px solid rgba(255, 255, 255, 0.3);
+            padding-left: 16px;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .cm-editor .cm-md-link,
+        .cm-editor .cm-md-url-short {
+            text-decoration: underline;
+            text-decoration-color: rgba(255, 255, 255, 0.45);
+            text-underline-offset: 3px;
+        }
+
+        .cm-editor .cm-md-bullet {
+            display: inline-block;
+            width: 0.8em;
+        }
+
+        .cm-editor .cm-md-hr {
+            display: inline-block;
+            width: 100%;
+            vertical-align: middle;
+            border-top: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
         /* PREVIEW CONTAINER */
         .preview-container {
             position: relative;
@@ -1696,6 +1760,174 @@
                 import(CM_URLS.markdown), import(CM_URLS.commands)
             ]);
             CM = { state, view, language, markdown, commands };
+            pwCMExtensions.push(buildLivePreview());
+        }
+
+        // === LIVE PREVIEW (Obsidian-style) ===
+        // Styles Markdown in place. Syntax markers are hidden except on lines the
+        // selection touches. Decorations only change what is drawn — never the text.
+
+        const BARE_URL_SHORTEN_AT = 40;
+
+        function buildLivePreview() {
+            const { Decoration, ViewPlugin, WidgetType } = CM.view;
+            const { syntaxTree } = CM.language;
+
+            class TextWidget extends WidgetType {
+                constructor(text, className, href) {
+                    super();
+                    this.text = text; this.className = className; this.href = href || '';
+                }
+                eq(other) { return other.text === this.text && other.className === this.className && other.href === this.href; }
+                toDOM() {
+                    const span = document.createElement('span');
+                    span.className = this.className;
+                    span.textContent = this.text;
+                    if (this.href) span.dataset.href = this.href;
+                    return span;
+                }
+                ignoreEvent() { return false; }
+            }
+
+            class RuleWidget extends WidgetType {
+                eq() { return true; }
+                toDOM() {
+                    const span = document.createElement('span');
+                    span.className = 'cm-md-hr';
+                    return span;
+                }
+            }
+
+            const hide = Decoration.replace({});
+            const mark = function(cls, attrs) { return Decoration.mark(attrs ? { class: cls, attributes: attrs } : { class: cls }); };
+            const lineClass = function(cls) { return Decoration.line({ class: cls }); };
+            const bullet = Decoration.replace({ widget: new TextWidget('•', 'cm-md-bullet') });
+            const rule = Decoration.replace({ widget: new RuleWidget() });
+
+            function activeLines(state) {
+                const lines = new Set();
+                for (const r of state.selection.ranges) {
+                    const a = state.doc.lineAt(r.from).number, b = state.doc.lineAt(r.to).number;
+                    for (let n = a; n <= b; n++) lines.add(n);
+                }
+                return lines;
+            }
+
+            function shortUrl(url) {
+                try { return new URL(url).hostname.replace(/^www\./, '') + '…'; }
+                catch (e) { return url.slice(0, BARE_URL_SHORTEN_AT) + '…'; }
+            }
+
+            function build(view) {
+                const state = view.state, doc = state.doc;
+                const active = activeLines(state);
+                const isActive = function(pos) { return active.has(doc.lineAt(pos).number); };
+                const out = [];
+                const add = function(from, to, deco) { if (to >= from) out.push(deco.range(from, to)); };
+                const addLines = function(from, to, cls) {
+                    for (let n = doc.lineAt(from).number; n <= doc.lineAt(to).number; n++) {
+                        const l = doc.line(n); out.push(lineClass(cls).range(l.from));
+                    }
+                };
+                // hide a marker plus one following space (e.g. "# ", "> ")
+                const hideWithSpace = function(from, to) {
+                    if (doc.sliceString(to, to + 1) === ' ') to++;
+                    add(from, to, hide);
+                };
+
+                for (const { from, to } of view.visibleRanges) {
+                    syntaxTree(state).iterate({
+                        from: from, to: to,
+                        enter: function(node) {
+                            const name = node.name, f = node.from, t = node.to;
+                            const parent = node.node.parent ? node.node.parent.name : '';
+                            let m;
+
+                            if ((m = /^(ATX|Setext)Heading(\d)$/.exec(name))) {
+                                addLines(f, f, 'cm-md-h' + m[2]);
+                            } else if (name === 'HeaderMark') {
+                                if (/^ATXHeading/.test(parent) && !isActive(f)) hideWithSpace(f, t);
+                            } else if (name === 'StrongEmphasis') {
+                                add(f, t, mark('cm-md-strong'));
+                            } else if (name === 'Emphasis') {
+                                add(f, t, mark('cm-md-em'));
+                            } else if (name === 'Strikethrough') {
+                                add(f, t, mark('cm-md-strike'));
+                            } else if (name === 'InlineCode') {
+                                add(f, t, mark('cm-md-code'));
+                            } else if (name === 'EmphasisMark' || name === 'StrikethroughMark') {
+                                if (!isActive(f)) add(f, t, hide);
+                            } else if (name === 'CodeMark') {
+                                if (!isActive(f)) add(f, t, hide);
+                            } else if (name === 'CodeInfo') {
+                                if (!isActive(f)) add(f, t, hide);
+                            } else if (name === 'FencedCode') {
+                                addLines(f, t, 'cm-md-codeblock');
+                            } else if (name === 'Blockquote') {
+                                addLines(f, t, 'cm-md-quote');
+                            } else if (name === 'QuoteMark') {
+                                if (!isActive(f)) hideWithSpace(f, t);
+                            } else if (name === 'ListMark') {
+                                if (parent === 'ListItem' && node.node.parent.parent &&
+                                    node.node.parent.parent.name === 'BulletList' && !isActive(f)) {
+                                    add(f, t, bullet);
+                                }
+                            } else if (name === 'HorizontalRule') {
+                                if (!isActive(f)) add(f, t, rule);
+                            } else if (name === 'Link') {
+                                decorateLink(node.node, isActive(f));
+                                return false;
+                            } else if (name === 'URL' && parent !== 'Image') {
+                                const url = doc.sliceString(f, t);
+                                if (url.length > BARE_URL_SHORTEN_AT && !isActive(f)) {
+                                    add(f, t, Decoration.replace({ widget: new TextWidget(shortUrl(url), 'cm-md-url-short', url) }));
+                                } else {
+                                    add(f, t, mark('cm-md-link', { 'data-href': url }));
+                                }
+                            }
+                        }
+                    });
+                }
+
+                // [text](url "title") — show text, hide the rest
+                function decorateLink(link, isOnCursor) {
+                    const marks = [], urlNode = link.getChild('URL');
+                    let c = link.firstChild;
+                    while (c) { if (c.name === 'LinkMark') marks.push(c); c = c.nextSibling; }
+                    if (marks.length < 2) return;
+                    const textFrom = marks[0].to, textTo = marks[1].from;
+                    const href = urlNode ? doc.sliceString(urlNode.from, urlNode.to) : '';
+                    if (textTo > textFrom) add(textFrom, textTo, mark('cm-md-link', href ? { 'data-href': href } : null));
+                    if (isOnCursor || !urlNode) return;   // reference links / cursor line: keep raw
+                    add(marks[0].from, marks[0].to, hide);
+                    add(marks[1].from, link.to, hide);
+                    // emphasis inside the link text still needs its markers hidden
+                    let inner = link.firstChild;
+                    while (inner) {
+                        if (inner.from >= textFrom && inner.to <= textTo) hideInner(inner);
+                        inner = inner.nextSibling;
+                    }
+                }
+                function hideInner(n) {
+                    if (n.name === 'EmphasisMark' || n.name === 'StrikethroughMark' || n.name === 'CodeMark') add(n.from, n.to, hide);
+                    if (n.name === 'StrongEmphasis') add(n.from, n.to, mark('cm-md-strong'));
+                    if (n.name === 'Emphasis') add(n.from, n.to, mark('cm-md-em'));
+                    let c = n.firstChild;
+                    while (c) { hideInner(c); c = c.nextSibling; }
+                }
+
+                return Decoration.set(out, true);
+            }
+
+            return ViewPlugin.fromClass(class {
+                constructor(view) { this.decorations = build(view); }
+                update(u) {
+                    if (u.docChanged || u.viewportChanged || u.selectionSet ||
+                        syntaxTree(u.state) !== syntaxTree(u.startState)) {
+                        this.decorations = build(u.view);
+                    }
+                }
+            }, { decorations: function(v) { return v.decorations; } });
         }
 
         function createEditorState(text) {
