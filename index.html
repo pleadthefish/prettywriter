@@ -101,6 +101,50 @@
             scrollbar-width: none;
         }
 
+        /* CODEMIRROR EDITOR — same box and type as the textarea it replaces */
+        .cm-editor {
+            width: 100%;
+            max-width: 800px;
+            height: 70vh;
+            background: transparent;
+            color: #ffffff;
+            font-size: 20px;
+            line-height: 1.8;
+            font-family: 'Georgia', serif;
+        }
+
+        .cm-editor.cm-focused {
+            outline: none;
+        }
+
+        .cm-editor .cm-scroller {
+            font-family: inherit;
+            line-height: inherit;
+            scrollbar-width: none;
+        }
+
+        .cm-editor .cm-scroller::-webkit-scrollbar {
+            width: 0px;
+            display: none;
+        }
+
+        .cm-editor .cm-content {
+            padding: 0;
+            caret-color: #ffffff;
+        }
+
+        .cm-editor .cm-line {
+            padding: 0;
+        }
+
+        .cm-editor .cm-placeholder {
+            color: rgba(255, 255, 255, 0.45);
+        }
+
+        .cm-editor .cm-content ::selection {
+            background: rgba(255, 255, 255, 0.28);
+        }
+
         /* PREVIEW CONTAINER */
         .preview-container {
             position: relative;
@@ -1609,6 +1653,146 @@
        const folderSelect = document.getElementById('folderSelect');
         const photoCreditEl = document.querySelector('.photo-credit');
 
+        // === EDITOR (CodeMirror 6, with textarea fallback) ===
+        // The writing surface is CodeMirror when it loads from the CDN, otherwise the
+        // original <textarea>. All app code goes through the helpers below.
+        // The stored text is always exactly the document string — nothing is normalised.
+
+        const CM_URLS = {
+            state: 'https://esm.sh/@codemirror/state@6.7.6',
+            view: 'https://esm.sh/@codemirror/view@6.43.15?deps=@codemirror/state@6.7.6',
+            language: 'https://esm.sh/@codemirror/language@6.13.1?deps=@codemirror/state@6.7.6,@codemirror/view@6.43.15',
+            markdown: 'https://esm.sh/@codemirror/lang-markdown@6.5.2?deps=@codemirror/state@6.7.6,@codemirror/view@6.43.15,@codemirror/language@6.13.1',
+            commands: 'https://esm.sh/@codemirror/commands@6.11.1?deps=@codemirror/state@6.7.6,@codemirror/view@6.43.15,@codemirror/language@6.13.1'
+        };
+        const CM_TIMEOUT_MS = 8000;
+
+        let cmView = null;   // EditorView when CodeMirror is active
+        let CM = null;       // loaded CodeMirror modules: { state, view, language, markdown, commands }
+        const pwCMExtensions = [];  // extra extensions (live preview) added before the view is built
+
+        const pwEditorReady = new Promise(function(resolve) {
+            let settled = false;
+            function settle(kind) {
+                if (settled) return;
+                settled = true;
+                resolve({ kind: kind });
+            }
+            setTimeout(function() { settle('textarea'); }, CM_TIMEOUT_MS);
+            loadCodeMirror().then(function() {
+                if (settled) return;  // timed out already: stay on the textarea
+                mountCodeMirror();
+                settle('cm');
+            }).catch(function(e) {
+                console.warn('CodeMirror failed to load, using plain editor:', e && e.message);
+                settle('textarea');
+            });
+        });
+
+        async function loadCodeMirror() {
+            const state = await import(CM_URLS.state);
+            const [view, language, markdown, commands] = await Promise.all([
+                import(CM_URLS.view), import(CM_URLS.language),
+                import(CM_URLS.markdown), import(CM_URLS.commands)
+            ]);
+            CM = { state, view, language, markdown, commands };
+        }
+
+        function createEditorState(text) {
+            const { EditorState, EditorSelection, Prec } = CM.state;
+            const { EditorView, keymap, placeholder } = CM.view;
+            const { history, historyKeymap, standardKeymap } = CM.commands;
+            const { markdown, markdownLanguage } = CM.markdown;
+
+            return EditorState.create({
+                doc: text,
+                selection: EditorSelection.cursor(text.length),
+                extensions: [
+                    // While Projects/History panels are open, their document-level key
+                    // handlers own the keyboard; CodeMirror must not also act on keys.
+                    Prec.highest(EditorView.domEventHandlers({
+                        keydown: function() {
+                            return projectsPanel.classList.contains('open') ||
+                                   historyPanel.classList.contains('open');
+                        }
+                    })),
+                    // Indented lines are prose here, not code blocks (Tab-indented paragraphs, the manual).
+                    markdown({ base: markdownLanguage, addKeymap: false, extensions: [{ remove: ['IndentedCode'] }] }),
+                    history(),
+                    keymap.of([
+                        { key: 'Tab', run: insertLiteral('\t') },
+                        { key: 'Enter', run: insertLiteral('\n') },
+                        ...historyKeymap,
+                        ...standardKeymap
+                    ]),
+                    EditorView.lineWrapping,
+                    placeholder('Begin writing...'),
+                    EditorView.contentAttributes.of({ spellcheck: 'true', autocorrect: 'on', autocapitalize: 'sentences' }),
+                    EditorView.updateListener.of(function(update) {
+                        if (update.docChanged) onEditorInput();
+                    }),
+                    ...pwCMExtensions
+                ]
+            });
+        }
+
+        function insertLiteral(str) {
+            return function(view) {
+                view.dispatch(view.state.replaceSelection(str), { scrollIntoView: true, userEvent: 'input' });
+                return true;
+            };
+        }
+
+        function mountCodeMirror() {
+            cmView = new CM.view.EditorView({
+                state: createEditorState(editor.value),
+                parent: editorContainer
+            });
+            editor.style.display = 'none';
+            cmView.dom.style.fontFamily = editor.style.fontFamily;
+            cmView.dom.style.fontSize = editor.style.fontSize;
+        }
+
+        function onEditorInput() {
+            saveCurrentProject();
+            updateWordCount();
+        }
+
+        function getEditorText() {
+            return cmView ? cmView.state.doc.toString() : editor.value;
+        }
+
+        // Replaces the whole document (project load/switch). Resets undo history so
+        // ⌘Z can't reach into another project. Does not trigger autosave.
+        function setEditorText(text) {
+            if (cmView) {
+                cmView.setState(createEditorState(text));
+                cmView.dispatch({ effects: CM.view.EditorView.scrollIntoView(text.length) });
+            } else {
+                editor.value = text;
+            }
+        }
+
+        function focusEditor() {
+            if (cmView) cmView.focus();
+            else editor.focus();
+        }
+
+        function setEditorFont(family) {
+            editor.style.fontFamily = family;
+            if (cmView) cmView.dom.style.fontFamily = family;
+        }
+
+        function setEditorFontSize(px) {
+            editor.style.fontSize = px + 'px';
+            if (cmView) cmView.dom.style.fontSize = px + 'px';
+        }
+
+        // Element that receives keydown while writing (typing sounds).
+        function editorDom() {
+            return cmView ? cmView.contentDOM : editor;
+        }
+
 let ideas = [];
 let editingId = null;
 let exportMenuOpen = false;
@@ -1692,7 +1876,7 @@ async function init() {
         // Load current project with all its settings
         const project = getCurrentProject();
         if (project) {
-            editor.value = project.text || '';
+            setEditorText(project.text || '');
             ideas = project.ideas || [];
             currentBgIndex = project.backgroundIndex || 0;
             currentTextSize = project.textSize || 'medium';
@@ -1721,7 +1905,8 @@ async function init() {
         loadSoundPreference();
         setupClickOutside();
         setupSearchInputs();
-        
+        focusEditor();
+
         console.log('=== INIT COMPLETE ===');
         console.log('Final projects:', projects);
         console.log('Final currentProjectId:', currentProjectId);
@@ -1977,13 +2162,10 @@ async function init() {
             });
         }
 
-        editor.addEventListener('input', function() {
-            saveCurrentProject(); // Save to current project
-            updateWordCount();
-        });
+        editor.addEventListener('input', onEditorInput);  // textarea fallback only
 
         function setupTypingSounds() {
-            editor.addEventListener('keydown', function(e) {
+            editorDom().addEventListener('keydown', function(e) {
                 if (!soundEnabled || e.metaKey || e.ctrlKey || e.altKey) return;
 
                 if (e.key === ' ') {
@@ -2091,7 +2273,7 @@ async function init() {
         }
 
         function applyFont() {
-            editor.style.fontFamily = `'${currentFont}', serif`;
+            setEditorFont(`'${currentFont}', serif`);
         }
 
         function saveFont() {
@@ -2171,7 +2353,7 @@ async function init() {
 
         function applyTextSize() {
             const size = textSizes[currentTextSize];
-            editor.style.fontSize = size + 'px';
+            setEditorFontSize(size);
             localStorage.setItem('textSize', currentTextSize);
         }
 
@@ -2403,7 +2585,7 @@ async function init() {
         function saveCurrentProject() {
             const project = getCurrentProject();
             if (project) {
-                project.text = editor.value;
+                project.text = getEditorText();
                 project.ideas = ideas;
                 project.backgroundIndex = currentBgIndex;
                 project.textSize = currentTextSize;
@@ -2529,7 +2711,7 @@ async function init() {
             const project = getCurrentProject();
 
             if (project) {
-                editor.value = project.text || '';
+                setEditorText(project.text || '');
                 ideas = project.ideas || [];
                 currentBgIndex = project.backgroundIndex || 0;
                 currentTextSize = project.textSize || 'medium';
@@ -3254,7 +3436,7 @@ async function init() {
                         id: Date.now(),
                         name: name,
                         type: 'project',
-                        text: editor.value,
+                        text: getEditorText(),
                         ideas: ideas,
                         backgroundIndex: currentBgIndex,
                         textSize: currentTextSize,
@@ -3330,7 +3512,7 @@ async function init() {
         }
 
         function updateWordCount() {
-            const text = editor.value.trim();
+            const text = getEditorText().trim();
             const words = text ? text.split(/\s+/).length : 0;
             wordCountEl.textContent = `${words} word${words !== 1 ? 's' : ''}`;
         }
@@ -3338,7 +3520,7 @@ async function init() {
         function loadSavedText() {
             const project = getCurrentProject();
             if (project) {
-                editor.value = project.text || '';
+                setEditorText(project.text || '');
                 updateWordCount();
             }
         }
@@ -3498,7 +3680,7 @@ async function init() {
         }
 
         function exportAs(format) {
-            const text = editor.value;
+            const text = getEditorText();
             const filename = `writing-${new Date().toISOString().split('T')[0]}`;
             
             toggleExportMenu();
@@ -3576,7 +3758,7 @@ ${paragraphs}
                 renderGlobalIdeas();
                 setTimeout(() => ideaInput.focus(), 300);
             } else {
-                editor.focus();
+                focusEditor();
             }
         }
 
@@ -3584,7 +3766,7 @@ ${paragraphs}
         let isPreviewMode = false;
 
         function renderMarkdown() {
-            const text = editor.value;
+            const text = getEditorText();
             const html = marked.parse(text);
             document.getElementById('markdownPreview').innerHTML = html;
         }
@@ -3607,7 +3789,7 @@ ${paragraphs}
                 editorContainer.style.display = 'flex';
                 previewContainer.style.display = 'none';
                 modeIndicator.textContent = 'Edit Mode';
-                editor.focus();
+                focusEditor();
             }
 
             // Show mode indicator briefly
@@ -3891,7 +4073,7 @@ ${paragraphs}
             }
         });
 
-        init();
+        pwEditorReady.then(init);
     </script>
 </body>
 </html>
