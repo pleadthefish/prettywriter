@@ -101,151 +101,133 @@
             scrollbar-width: none;
         }
 
-        /* PREVIEW CONTAINER */
-        .preview-container {
-            position: relative;
-            z-index: 3;
-            height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 60px 20px;
-            transition: padding-right 0.3s ease;
-        }
-
-        #markdownPreview {
+        /* CODEMIRROR EDITOR — same box and type as the textarea it replaces */
+        .cm-editor {
             width: 100%;
             max-width: 800px;
             height: 70vh;
-            overflow-y: auto;
+            background: transparent;
             color: #ffffff;
             font-size: 20px;
             line-height: 1.8;
             font-family: 'Georgia', serif;
         }
 
-        /* Markdown preview scrollbar - invisible like editor */
-        #markdownPreview::-webkit-scrollbar {
+        .cm-editor.cm-focused {
+            outline: none;
+        }
+
+        .cm-editor .cm-scroller {
+            font-family: inherit;
+            line-height: inherit;
+            scrollbar-width: none;
+        }
+
+        .cm-editor .cm-scroller::-webkit-scrollbar {
             width: 0px;
             display: none;
         }
 
-        #markdownPreview::-webkit-scrollbar-track {
-            background: transparent;
-            border: none;
+        .cm-editor .cm-content {
+            padding: 0;
+            caret-color: #ffffff;
         }
 
-        #markdownPreview::-webkit-scrollbar-thumb {
-            background: transparent;
+        .cm-editor .cm-line {
+            padding: 0;
         }
 
-        #markdownPreview {
-            scrollbar-width: none;
+        .cm-editor .cm-placeholder {
+            color: rgba(255, 255, 255, 0.45);
         }
 
-        /* Markdown styling */
-        #markdownPreview h1 {
-            font-size: 2em;
+        .cm-editor .cm-content ::selection {
+            background: rgba(255, 255, 255, 0.28);
+        }
+
+        /* LIVE PREVIEW — Markdown styled in place (see buildLivePreview) */
+        .cm-editor .cm-md-h1,
+        .cm-editor .cm-md-h2,
+        .cm-editor .cm-md-h3,
+        .cm-editor .cm-md-h4,
+        .cm-editor .cm-md-h5,
+        .cm-editor .cm-md-h6 {
             font-weight: bold;
-            margin: 0.67em 0;
             line-height: 1.3;
+            padding-top: 0.3em;
+            padding-bottom: 0.15em;
         }
 
-        #markdownPreview h2 {
-            font-size: 1.5em;
-            font-weight: bold;
-            margin: 0.75em 0;
-            line-height: 1.3;
-        }
+        .cm-editor .cm-md-h1 { font-size: 2em; }
+        .cm-editor .cm-md-h2 { font-size: 1.5em; }
+        .cm-editor .cm-md-h3 { font-size: 1.25em; }
+        .cm-editor .cm-md-h4,
+        .cm-editor .cm-md-h5,
+        .cm-editor .cm-md-h6 { font-size: 1.1em; }
 
-        #markdownPreview h3 {
-            font-size: 1.17em;
-            font-weight: bold;
-            margin: 0.83em 0;
-            line-height: 1.3;
-        }
+        .cm-editor .cm-md-strong { font-weight: bold; }
+        .cm-editor .cm-md-em { font-style: italic; }
+        .cm-editor .cm-md-strike { text-decoration: line-through; }
 
-        #markdownPreview strong {
-            font-weight: bold;
-        }
-
-        #markdownPreview em {
-            font-style: italic;
-        }
-
-        #markdownPreview code {
+        .cm-editor .cm-md-code {
             background: rgba(255, 255, 255, 0.1);
-            padding: 2px 6px;
             border-radius: 3px;
             font-family: 'Courier New', monospace;
             font-size: 0.9em;
         }
 
-        #markdownPreview pre {
-            background: rgba(255, 255, 255, 0.05);
-            padding: 16px;
-            border-radius: 6px;
-            overflow-x: auto;
-            margin: 1em 0;
-        }
-
-        #markdownPreview pre code {
-            background: transparent;
-            padding: 0;
+        .cm-editor .cm-md-codeblock {
+            background: rgba(255, 255, 255, 0.06);
+            font-family: 'Courier New', monospace;
             font-size: 0.85em;
             line-height: 1.6;
+            padding: 0 16px;
         }
 
-        #markdownPreview blockquote {
+        .cm-editor .cm-md-quote {
             border-left: 4px solid rgba(255, 255, 255, 0.3);
             padding-left: 16px;
-            margin: 1em 0;
             color: rgba(255, 255, 255, 0.8);
         }
 
-        #markdownPreview ul, #markdownPreview ol {
-            padding-left: 2em;
-            margin: 1em 0;
+        .cm-editor .cm-md-link,
+        .cm-editor .cm-md-url-short {
+            text-decoration: underline;
+            text-decoration-color: rgba(255, 255, 255, 0.45);
+            text-underline-offset: 3px;
         }
 
-        #markdownPreview li {
+        .cm-editor .cm-md-bullet {
+            display: inline-block;
+            width: 0.8em;
+        }
+
+        .cm-editor .cm-md-image-wrap {
+            display: block;
             margin: 0.5em 0;
         }
 
-        #markdownPreview a {
-            color: #6b9bd1;
-            text-decoration: none;
+        .cm-editor .cm-md-image {
+            display: block;
+            max-width: 100%;
+            height: auto;
+            margin: 0 auto;
         }
 
-        #markdownPreview a:hover {
-            text-decoration: underline;
+        .cm-editor .cm-md-image-missing {
+            display: inline-block;
+            font-size: 0.8em;
+            color: rgba(255, 255, 255, 0.5);
+            border: 1px dashed rgba(255, 255, 255, 0.3);
+            border-radius: 3px;
+            padding: 0 8px;
         }
 
-        #markdownPreview hr {
-            border: none;
-            border-top: 1px solid rgba(255, 255, 255, 0.2);
-            margin: 2em 0;
-        }
-
-        #markdownPreview p {
-            margin: 1em 0;
-        }
-
-        /* MODE INDICATOR */
-        .mode-indicator {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            z-index: 10;
-            color: rgba(255, 255, 255, 0.6);
-            font-size: 13px;
-            opacity: 0;
-            transition: opacity 0.3s;
-            pointer-events: none;
-        }
-
-        .mode-indicator.visible {
-            opacity: 1;
+        .cm-editor .cm-md-hr {
+            display: inline-block;
+            width: 100%;
+            vertical-align: middle;
+            border-top: 1px solid rgba(255, 255, 255, 0.3);
         }
 
         .prompt-display {
@@ -1325,7 +1307,6 @@
             background: rgba(107, 155, 209, 0.2);
         }
     </style>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/9.1.6/marked.min.js"></script>
 </head>
 <body>
     <div class="bg-image" id="bgImage"></div>
@@ -1335,9 +1316,6 @@
         <textarea id="editor" placeholder="Begin writing..." autofocus></textarea>
     </div>
 
-    <div class="preview-container" id="previewContainer" style="display: none;">
-        <div id="markdownPreview"></div>
-    </div>
 
     <div class="prompt-display" id="promptDisplay"></div>
 
@@ -1355,12 +1333,9 @@
     <!-- PROJECT TITLE -->
     <div class="project-title" id="projectTitle">Untitled</div>
 
-    <!-- MODE INDICATOR -->
-    <div class="mode-indicator" id="modeIndicator"></div>
-
     <!-- KEYBOARD SHORTCUTS REMINDER -->
     <div class="shortcuts-hint">
-        ⌘K Ideas · Esc Esc Projects · ⌘\ History · ⌘P Prompt · ⌘B Background · ⌘E Export · ⌘/ Sound · ⌘S Save · ⌘F Fullscreen · Ctrl+M Markdown Preview
+        ⌘K Ideas · Esc Esc Projects · ⌘\ History · ⌘P Prompt · ⌘B Background · ⌘E Export · ⌘/ Sound · ⌘S Save · ⌘F Fullscreen
     </div>
 
     <!-- PHOTO CREDIT -->
@@ -1609,6 +1584,397 @@
        const folderSelect = document.getElementById('folderSelect');
         const photoCreditEl = document.querySelector('.photo-credit');
 
+        // === EDITOR (CodeMirror 6, with textarea fallback) ===
+        // The writing surface is CodeMirror when it loads from the CDN, otherwise the
+        // original <textarea>. All app code goes through the helpers below.
+        // The stored text is always exactly the document string — nothing is normalised.
+
+        const CM_URLS = {
+            state: 'https://esm.sh/@codemirror/state@6.7.6',
+            view: 'https://esm.sh/@codemirror/view@6.43.15?deps=@codemirror/state@6.7.6',
+            language: 'https://esm.sh/@codemirror/language@6.13.1?deps=@codemirror/state@6.7.6,@codemirror/view@6.43.15',
+            markdown: 'https://esm.sh/@codemirror/lang-markdown@6.5.2?deps=@codemirror/state@6.7.6,@codemirror/view@6.43.15,@codemirror/language@6.13.1',
+            commands: 'https://esm.sh/@codemirror/commands@6.11.1?deps=@codemirror/state@6.7.6,@codemirror/view@6.43.15,@codemirror/language@6.13.1'
+        };
+        const CM_TIMEOUT_MS = 8000;
+
+        let cmView = null;   // EditorView when CodeMirror is active
+        let CM = null;       // loaded CodeMirror modules: { state, view, language, markdown, commands }
+        const pwCMExtensions = [];  // extra extensions (live preview) added before the view is built
+
+        const pwEditorReady = new Promise(function(resolve) {
+            let settled = false;
+            function settle(kind) {
+                if (settled) return;
+                settled = true;
+                resolve({ kind: kind });
+            }
+            setTimeout(function() { settle('textarea'); }, CM_TIMEOUT_MS);
+            loadCodeMirror().then(function() {
+                if (settled) return;  // timed out already: stay on the textarea
+                mountCodeMirror();
+                settle('cm');
+            }).catch(function(e) {
+                console.warn('CodeMirror failed to load, using plain editor:', e && e.message);
+                settle('textarea');
+            });
+        });
+
+        async function loadCodeMirror() {
+            const state = await import(CM_URLS.state);
+            const [view, language, markdown, commands] = await Promise.all([
+                import(CM_URLS.view), import(CM_URLS.language),
+                import(CM_URLS.markdown), import(CM_URLS.commands)
+            ]);
+            CM = { state, view, language, markdown, commands };
+            pwCMExtensions.push(buildLivePreview());
+        }
+
+        // === LIVE PREVIEW (Obsidian-style) ===
+        // Styles Markdown in place. Syntax markers are hidden except on lines the
+        // selection touches. Decorations only change what is drawn — never the text.
+
+        const BARE_URL_SHORTEN_AT = 40;
+
+        function buildLivePreview() {
+            const { Decoration, ViewPlugin, WidgetType } = CM.view;
+            const { syntaxTree } = CM.language;
+
+            class TextWidget extends WidgetType {
+                constructor(text, className, href) {
+                    super();
+                    this.text = text; this.className = className; this.href = href || '';
+                }
+                eq(other) { return other.text === this.text && other.className === this.className && other.href === this.href; }
+                toDOM() {
+                    const span = document.createElement('span');
+                    span.className = this.className;
+                    span.textContent = this.text;
+                    if (this.href) span.dataset.href = this.href;
+                    return span;
+                }
+                ignoreEvent() { return false; }
+            }
+
+            class ImageWidget extends WidgetType {
+                constructor(src, alt) {
+                    super();
+                    this.src = src; this.alt = alt;
+                }
+                eq(other) { return other.src === this.src && other.alt === this.alt; }
+                toDOM(view) {
+                    const wrap = document.createElement('span');
+                    wrap.className = 'cm-md-image-wrap';
+                    const img = document.createElement('img');
+                    img.className = 'cm-md-image';
+                    img.alt = this.alt;
+                    img.loading = 'lazy';
+                    img.src = this.src;
+                    const alt = this.alt;
+                    img.addEventListener('load', function() { view.requestMeasure(); });
+                    img.addEventListener('error', function() {
+                        const missing = document.createElement('span');
+                        missing.className = 'cm-md-image-missing';
+                        missing.textContent = alt || 'image unavailable';
+                        img.replaceWith(missing);
+                        view.requestMeasure();
+                    });
+                    wrap.appendChild(img);
+                    return wrap;
+                }
+                ignoreEvent() { return false; }
+            }
+
+            class RuleWidget extends WidgetType {
+                eq() { return true; }
+                toDOM() {
+                    const span = document.createElement('span');
+                    span.className = 'cm-md-hr';
+                    return span;
+                }
+            }
+
+            const hide = Decoration.replace({});
+            const mark = function(cls, attrs) { return Decoration.mark(attrs ? { class: cls, attributes: attrs } : { class: cls }); };
+            const lineClass = function(cls) { return Decoration.line({ class: cls }); };
+            const bullet = Decoration.replace({ widget: new TextWidget('•', 'cm-md-bullet') });
+            const rule = Decoration.replace({ widget: new RuleWidget() });
+
+            function activeLines(state) {
+                const lines = new Set();
+                for (const r of state.selection.ranges) {
+                    const a = state.doc.lineAt(r.from).number, b = state.doc.lineAt(r.to).number;
+                    for (let n = a; n <= b; n++) lines.add(n);
+                }
+                return lines;
+            }
+
+            function shortUrl(url) {
+                try { return new URL(url).hostname.replace(/^www\./, '') + '…'; }
+                catch (e) { return url.slice(0, BARE_URL_SHORTEN_AT) + '…'; }
+            }
+
+            function build(view) {
+                const state = view.state, doc = state.doc;
+                const active = activeLines(state);
+                const isActive = function(pos) { return active.has(doc.lineAt(pos).number); };
+                // inline syntax shows only while the cursor/selection touches the span,
+                // so "**bold** " renders the moment you type past the closing mark
+                const touches = function(from, to) {
+                    return state.selection.ranges.some(function(r) { return r.from <= to && r.to >= from; });
+                };
+                const touchesParent = function(node) {
+                    const p = node.node.parent;
+                    return p ? touches(p.from, p.to) : isActive(node.from);
+                };
+                const out = [];
+                const add = function(from, to, deco) { if (to >= from) out.push(deco.range(from, to)); };
+                const sameLine = function(from, to) { return doc.lineAt(from).number === doc.lineAt(to).number; };
+                // replace decorations from a plugin must stay within one line
+                const replace = function(from, to, deco) {
+                    if (!sameLine(from, to)) return false;
+                    add(from, to, deco);
+                    return true;
+                };
+                const addLines = function(from, to, cls) {
+                    for (let n = doc.lineAt(from).number; n <= doc.lineAt(to).number; n++) {
+                        const l = doc.line(n); out.push(lineClass(cls).range(l.from));
+                    }
+                };
+                // hide a marker plus one following space (e.g. "# ", "> ")
+                const hideWithSpace = function(from, to) {
+                    if (doc.sliceString(to, to + 1) === ' ') to++;
+                    replace(from, to, hide);
+                };
+
+                for (const { from, to } of view.visibleRanges) {
+                    syntaxTree(state).iterate({
+                        from: from, to: to,
+                        enter: function(node) {
+                            const name = node.name, f = node.from, t = node.to;
+                            const parent = node.node.parent ? node.node.parent.name : '';
+                            let m;
+
+                            if ((m = /^(ATX|Setext)Heading(\d)$/.exec(name))) {
+                                addLines(f, f, 'cm-md-h' + m[2]);
+                            } else if (name === 'HeaderMark') {
+                                if (/^ATXHeading/.test(parent) && !isActive(f)) hideWithSpace(f, t);
+                            } else if (name === 'StrongEmphasis') {
+                                add(f, t, mark('cm-md-strong'));
+                            } else if (name === 'Emphasis') {
+                                add(f, t, mark('cm-md-em'));
+                            } else if (name === 'Strikethrough') {
+                                add(f, t, mark('cm-md-strike'));
+                            } else if (name === 'InlineCode') {
+                                add(f, t, mark('cm-md-code'));
+                            } else if (name === 'EmphasisMark' || name === 'StrikethroughMark') {
+                                if (!touchesParent(node)) replace(f, t, hide);
+                            } else if (name === 'CodeMark') {
+                                // inline code: per span; fenced block fences: per line
+                                const hidden = parent === 'InlineCode' ? !touchesParent(node) : !isActive(f);
+                                if (hidden) replace(f, t, hide);
+                            } else if (name === 'CodeInfo') {
+                                if (!isActive(f)) replace(f, t, hide);
+                            } else if (name === 'FencedCode') {
+                                addLines(f, t, 'cm-md-codeblock');
+                            } else if (name === 'Blockquote') {
+                                addLines(f, t, 'cm-md-quote');
+                            } else if (name === 'QuoteMark') {
+                                if (!isActive(f)) hideWithSpace(f, t);
+                            } else if (name === 'ListMark') {
+                                if (parent === 'ListItem' && node.node.parent.parent &&
+                                    node.node.parent.parent.name === 'BulletList' && !isActive(f)) {
+                                    replace(f, t, bullet);
+                                }
+                            } else if (name === 'HorizontalRule') {
+                                if (!isActive(f)) replace(f, t, rule);
+                            } else if (name === 'Link') {
+                                decorateLink(node.node, touches(f, t));
+                                return false;
+                            } else if (name === 'Image') {
+                                decorateImage(node.node, touches(f, t));
+                                return false;
+                            } else if (name === 'URL' && parent !== 'Image') {
+                                const url = doc.sliceString(f, t);
+                                if (url.length > BARE_URL_SHORTEN_AT && !touches(f, t)) {
+                                    replace(f, t, Decoration.replace({ widget: new TextWidget(shortUrl(url), 'cm-md-url-short', url) }));
+                                } else {
+                                    add(f, t, mark('cm-md-link', { 'data-href': url }));
+                                }
+                            }
+                        }
+                    });
+                }
+
+                // [text](url "title") — show text, hide the rest
+                function decorateLink(link, isOnCursor) {
+                    const marks = [], urlNode = link.getChild('URL');
+                    let c = link.firstChild;
+                    while (c) { if (c.name === 'LinkMark') marks.push(c); c = c.nextSibling; }
+                    if (marks.length < 2) return;
+                    const textFrom = marks[0].to, textTo = marks[1].from;
+                    const href = urlNode ? doc.sliceString(urlNode.from, urlNode.to) : '';
+                    if (textTo > textFrom) add(textFrom, textTo, mark('cm-md-link', href ? { 'data-href': href } : null));
+                    if (isOnCursor || !urlNode) return;   // reference links / cursor on link: keep raw
+                    if (!sameLine(link.from, link.to)) return;   // wrapped link: keep raw
+                    replace(marks[0].from, marks[0].to, hide);
+                    replace(marks[1].from, link.to, hide);
+                    // emphasis inside the link text still needs its markers hidden
+                    let inner = link.firstChild;
+                    while (inner) {
+                        if (inner.from >= textFrom && inner.to <= textTo) hideInner(inner);
+                        inner = inner.nextSibling;
+                    }
+                }
+                // ![alt](src) — away from the cursor the image replaces its source;
+                // with the cursor on it the source stays editable with the image after it
+                function decorateImage(image, isOnCursor) {
+                    const urlNode = image.getChild('URL');
+                    if (!urlNode) return;
+                    const marks = [];
+                    let c = image.firstChild;
+                    while (c) { if (c.name === 'LinkMark') marks.push(c); c = c.nextSibling; }
+                    const alt = marks.length >= 2 ? doc.sliceString(marks[0].to, marks[1].from) : '';
+                    const widget = new ImageWidget(doc.sliceString(urlNode.from, urlNode.to), alt);
+                    // wrapped source can't be replaced: keep it and show the image after it
+                    if (isOnCursor || !replace(image.from, image.to, Decoration.replace({ widget: widget }))) {
+                        out.push(Decoration.widget({ widget: widget, side: 1 }).range(image.to));
+                    }
+                }
+                function hideInner(n) {
+                    if (n.name === 'EmphasisMark' || n.name === 'StrikethroughMark' || n.name === 'CodeMark') replace(n.from, n.to, hide);
+                    if (n.name === 'StrongEmphasis') add(n.from, n.to, mark('cm-md-strong'));
+                    if (n.name === 'Emphasis') add(n.from, n.to, mark('cm-md-em'));
+                    let c = n.firstChild;
+                    while (c) { hideInner(c); c = c.nextSibling; }
+                }
+
+                return Decoration.set(out, true);
+            }
+
+            // ⌘-click (Ctrl-click elsewhere) opens a link; a plain click just places the cursor
+            const linkClicks = CM.view.EditorView.domEventHandlers({
+                mousedown: function(e) {
+                    if (!(e.metaKey || e.ctrlKey) || e.button !== 0) return false;
+                    const el = e.target.closest && e.target.closest('[data-href]');
+                    if (!el) return false;
+                    const href = el.dataset.href;
+                    if (!/^(https?:|mailto:)/i.test(href)) return false;
+                    e.preventDefault();
+                    window.open(href, '_blank', 'noopener');
+                    return true;
+                }
+            });
+
+            return [linkClicks, ViewPlugin.fromClass(class {
+                constructor(view) { this.decorations = build(view); }
+                update(u) {
+                    if (u.docChanged || u.viewportChanged || u.selectionSet ||
+                        syntaxTree(u.state) !== syntaxTree(u.startState)) {
+                        this.decorations = build(u.view);
+                    }
+                }
+            }, { decorations: function(v) { return v.decorations; } })];
+        }
+
+        function createEditorState(text) {
+            const { EditorState, EditorSelection, Prec } = CM.state;
+            const { EditorView, keymap, placeholder } = CM.view;
+            const { history, historyKeymap, standardKeymap, deleteCharBackwardStrict } = CM.commands;
+            const { markdown, markdownLanguage } = CM.markdown;
+
+            return EditorState.create({
+                doc: text,
+                selection: EditorSelection.cursor(text.length),
+                extensions: [
+                    // While Projects/History panels are open, their document-level key
+                    // handlers own the keyboard; CodeMirror must not also act on keys.
+                    Prec.highest(EditorView.domEventHandlers({
+                        keydown: function() {
+                            return projectsPanel.classList.contains('open') ||
+                                   historyPanel.classList.contains('open');
+                        }
+                    })),
+                    // Indented lines are prose here, not code blocks (Tab-indented paragraphs, the manual).
+                    markdown({ base: markdownLanguage, addKeymap: false, extensions: [{ remove: ['IndentedCode'] }] }),
+                    history(),
+                    keymap.of([
+                        { key: 'Tab', run: insertLiteral('\t'), shift: insertLiteral('\t') },
+                        { key: 'Enter', run: insertLiteral('\n'), shift: insertLiteral('\n') },
+                        { key: 'Backspace', run: deleteCharBackwardStrict, shift: deleteCharBackwardStrict },
+                        ...historyKeymap,
+                        // Mac-only Emacs Ctrl bindings are dropped: PW treats Ctrl like ⌘
+                        // (Ctrl+K would otherwise delete to end of line and open Ideas)
+                        ...standardKeymap.filter(function(b) { return !(!b.key && b.mac && /^Ctrl-/.test(b.mac)); })
+                    ]),
+                    EditorView.lineWrapping,
+                    placeholder('Begin writing...'),
+                    EditorView.contentAttributes.of({ spellcheck: 'true', autocorrect: 'on', autocapitalize: 'sentences' }),
+                    EditorView.updateListener.of(function(update) {
+                        if (update.docChanged) onEditorInput();
+                    }),
+                    ...pwCMExtensions
+                ]
+            });
+        }
+
+        function insertLiteral(str) {
+            return function(view) {
+                view.dispatch(view.state.replaceSelection(str), { scrollIntoView: true, userEvent: 'input' });
+                return true;
+            };
+        }
+
+        function mountCodeMirror() {
+            cmView = new CM.view.EditorView({
+                state: createEditorState(editor.value),
+                parent: editorContainer
+            });
+            editor.style.display = 'none';
+            cmView.dom.style.fontFamily = editor.style.fontFamily;
+            cmView.dom.style.fontSize = editor.style.fontSize;
+        }
+
+        function onEditorInput() {
+            saveCurrentProject();
+            updateWordCount();
+        }
+
+        function getEditorText() {
+            return cmView ? cmView.state.doc.toString() : editor.value;
+        }
+
+        // Replaces the whole document (project load/switch). Resets undo history so
+        // ⌘Z can't reach into another project. Does not trigger autosave.
+        function setEditorText(text) {
+            if (cmView) {
+                cmView.setState(createEditorState(text));
+                cmView.dispatch({ effects: CM.view.EditorView.scrollIntoView(text.length) });
+            } else {
+                editor.value = text;
+            }
+        }
+
+        function focusEditor() {
+            if (cmView) cmView.focus();
+            else editor.focus();
+        }
+
+        function setEditorFont(family) {
+            editor.style.fontFamily = family;
+            if (cmView) cmView.dom.style.fontFamily = family;
+        }
+
+        function setEditorFontSize(px) {
+            editor.style.fontSize = px + 'px';
+            if (cmView) cmView.dom.style.fontSize = px + 'px';
+        }
+
+        // Element that receives keydown while writing (typing sounds).
+        function editorDom() {
+            return cmView ? cmView.contentDOM : editor;
+        }
+
 let ideas = [];
 let editingId = null;
 let exportMenuOpen = false;
@@ -1640,13 +2006,6 @@ let selectedHistoryIndex = 0;
 async function init() {
     try {
         console.log('=== INIT START ===');
-
-        // Configure marked.js for markdown rendering
-        marked.setOptions({
-            breaks: true,
-            gfm: true,
-            headerIds: false
-        });
 
         const isFirstTime = !localStorage.getItem('hasVisited');
 
@@ -1692,7 +2051,7 @@ async function init() {
         // Load current project with all its settings
         const project = getCurrentProject();
         if (project) {
-            editor.value = project.text || '';
+            setEditorText(project.text || '');
             ideas = project.ideas || [];
             currentBgIndex = project.backgroundIndex || 0;
             currentTextSize = project.textSize || 'medium';
@@ -1721,7 +2080,8 @@ async function init() {
         loadSoundPreference();
         setupClickOutside();
         setupSearchInputs();
-        
+        focusEditor();
+
         console.log('=== INIT COMPLETE ===');
         console.log('Final projects:', projects);
         console.log('Final currentProjectId:', currentProjectId);
@@ -1818,12 +2178,6 @@ async function init() {
                 if (mod && e.key === '/') {
                     e.preventDefault();
                     toggleSound();
-                }
-
-                // Markdown preview toggle - using Ctrl+M (specifically Ctrl, not Cmd)
-                if (e.ctrlKey && e.key === 'm') {
-                    e.preventDefault();
-                    togglePreview();
                 }
 
                 // Font cycle - using ⌘] (forward) and ⌘[ (backward)
@@ -1977,13 +2331,10 @@ async function init() {
             });
         }
 
-        editor.addEventListener('input', function() {
-            saveCurrentProject(); // Save to current project
-            updateWordCount();
-        });
+        editor.addEventListener('input', onEditorInput);  // textarea fallback only
 
         function setupTypingSounds() {
-            editor.addEventListener('keydown', function(e) {
+            editorDom().addEventListener('keydown', function(e) {
                 if (!soundEnabled || e.metaKey || e.ctrlKey || e.altKey) return;
 
                 if (e.key === ' ') {
@@ -2091,7 +2442,7 @@ async function init() {
         }
 
         function applyFont() {
-            editor.style.fontFamily = `'${currentFont}', serif`;
+            setEditorFont(`'${currentFont}', serif`);
         }
 
         function saveFont() {
@@ -2171,7 +2522,7 @@ async function init() {
 
         function applyTextSize() {
             const size = textSizes[currentTextSize];
-            editor.style.fontSize = size + 'px';
+            setEditorFontSize(size);
             localStorage.setItem('textSize', currentTextSize);
         }
 
@@ -2403,7 +2754,7 @@ async function init() {
         function saveCurrentProject() {
             const project = getCurrentProject();
             if (project) {
-                project.text = editor.value;
+                project.text = getEditorText();
                 project.ideas = ideas;
                 project.backgroundIndex = currentBgIndex;
                 project.textSize = currentTextSize;
@@ -2529,7 +2880,7 @@ async function init() {
             const project = getCurrentProject();
 
             if (project) {
-                editor.value = project.text || '';
+                setEditorText(project.text || '');
                 ideas = project.ideas || [];
                 currentBgIndex = project.backgroundIndex || 0;
                 currentTextSize = project.textSize || 'medium';
@@ -3254,7 +3605,7 @@ async function init() {
                         id: Date.now(),
                         name: name,
                         type: 'project',
-                        text: editor.value,
+                        text: getEditorText(),
                         ideas: ideas,
                         backgroundIndex: currentBgIndex,
                         textSize: currentTextSize,
@@ -3330,7 +3681,7 @@ async function init() {
         }
 
         function updateWordCount() {
-            const text = editor.value.trim();
+            const text = getEditorText().trim();
             const words = text ? text.split(/\s+/).length : 0;
             wordCountEl.textContent = `${words} word${words !== 1 ? 's' : ''}`;
         }
@@ -3338,7 +3689,7 @@ async function init() {
         function loadSavedText() {
             const project = getCurrentProject();
             if (project) {
-                editor.value = project.text || '';
+                setEditorText(project.text || '');
                 updateWordCount();
             }
         }
@@ -3498,7 +3849,7 @@ async function init() {
         }
 
         function exportAs(format) {
-            const text = editor.value;
+            const text = getEditorText();
             const filename = `writing-${new Date().toISOString().split('T')[0]}`;
             
             toggleExportMenu();
@@ -3576,45 +3927,8 @@ ${paragraphs}
                 renderGlobalIdeas();
                 setTimeout(() => ideaInput.focus(), 300);
             } else {
-                editor.focus();
+                focusEditor();
             }
-        }
-
-        // Markdown preview state
-        let isPreviewMode = false;
-
-        function renderMarkdown() {
-            const text = editor.value;
-            const html = marked.parse(text);
-            document.getElementById('markdownPreview').innerHTML = html;
-        }
-
-        function togglePreview() {
-            isPreviewMode = !isPreviewMode;
-
-            const editorContainer = document.querySelector('.editor-container');
-            const previewContainer = document.getElementById('previewContainer');
-            const modeIndicator = document.getElementById('modeIndicator');
-
-            if (isPreviewMode) {
-                // Switch to preview mode
-                renderMarkdown();
-                editorContainer.style.display = 'none';
-                previewContainer.style.display = 'flex';
-                modeIndicator.textContent = 'Preview Mode';
-            } else {
-                // Switch to edit mode
-                editorContainer.style.display = 'flex';
-                previewContainer.style.display = 'none';
-                modeIndicator.textContent = 'Edit Mode';
-                editor.focus();
-            }
-
-            // Show mode indicator briefly
-            modeIndicator.classList.add('visible');
-            setTimeout(() => {
-                modeIndicator.classList.remove('visible');
-            }, 1500);
         }
 
         function loadIdeas() {
@@ -3891,7 +4205,7 @@ ${paragraphs}
             }
         });
 
-        init();
+        pwEditorReady.then(init);
     </script>
 </body>
 </html>

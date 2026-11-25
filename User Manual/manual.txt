@@ -32,6 +32,24 @@ TEXT CONTROLS
     ⌘[          Previous font
     ⌘.          Increase text size
     ⌘,          Decrease text size
+    ⌘-click     Open a link
+
+
+═══════════════════════════════════════════════════════════════════════════════
+WRITING IN MARKDOWN
+═══════════════════════════════════════════════════════════════════════════════
+PrettyWriter renders Markdown as you type. Bold, italics, code and links take effect as soon as you type past the closing mark, and their symbols come back when your cursor touches them, so you can always edit them. Line symbols like # for headings and > for quotes hide when your cursor leaves the line. Your text is saved exactly as you typed it.
+
+    `# Heading`         Heading (`##` and `###` for smaller)
+    `**bold**`          Bold
+    `_italic_`          Italic
+    `~~strike~~`        Strikethrough
+    `` `code` ``            Inline code
+    `> quote`           Block quote
+    `- item`            Bulleted list
+    `---`               Divider line
+    `[text](url)`       Link (⌘-click to open)
+    `![alt](url)`       Image
 
 
 ═══════════════════════════════════════════════════════════════════════════════

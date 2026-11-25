@@ -30,6 +30,8 @@ User Manual/manual.txt   Manual text, loaded into the pinned "User Manual" proje
 images/photo1-13.jpg     Background photos (© Drew Parrish, NOT MIT — see CONTENT-LICENSE.txt)
 typefaces/               Traveling Typewriter + Drafting Mono (.ttf)
 README.md                Public-facing overview and shortcut list
+CHANGELOG.md             User-facing changes, newest first — add an entry when shipping to main
+docs/superpowers/        Design specs and implementation plans
 LICENSE                  MIT (code)
 CONTENT-LICENSE.txt      All rights reserved (photography)
 ```
@@ -42,15 +44,28 @@ Line numbers are approximate — grep for the function name.
 
 | Section | ~Lines |
 |---|---|
-| `<style>` | 7–1327 |
-| `marked.js` CDN script (only external dependency) | 1328 |
-| HTML markup (editor, panels, modals, print shop) | 1329–1543 |
-| `<script>` — app logic | 1544–3895 |
+| `<style>` (incl. `.cm-editor` / `.cm-md-*` live-preview styles) | 7–1309 |
+| HTML markup (editor, panels, modals, print shop) | 1311–1518 |
+| `<script>` — app logic | 1519–4185 |
 
 Key areas in the script, by feature:
 
 - **Data / config:** `backgrounds` array, `prompts` array, `textSizes`, `fonts`
-- **Startup:** `init()` → `loadProjects()` → `ensureManualProject()`, then setup calls
+- **Startup:** `pwEditorReady.then(init)` — `init()` waits for the editor, then
+  `loadProjects()` → `ensureManualProject()`, then setup calls
+- **Editor:** `// === EDITOR ===` — CodeMirror 6 loaded by `loadCodeMirror()` (dynamic
+  `import()` from esm.sh, exact pinned versions in `CM_URLS`). If it fails or takes
+  over 8s, the original `<textarea id="editor">` is used instead. **All code reaches
+  the editor through the helpers:** `getEditorText()`, `setEditorText()` (resets undo),
+  `focusEditor()`, `setEditorFont()`, `setEditorFontSize()`, `editorDom()`. Keymap is
+  deliberately minimal (history + standard editing, Tab/Enter insert literal `\t`/`\n`)
+  so CodeMirror never shadows PW shortcuts.
+- **Live preview:** `buildLivePreview()` — one ViewPlugin over the Markdown syntax tree
+  (GFM, indented-code rule removed). Inline syntax (emphasis, code, links, images,
+  URLs) hides unless the selection touches that span (`touches()`); block markers
+  (`#`, `>`, bullets, rules, fences) hide off the cursor line(s). Styles
+  headings/emphasis/quotes/code, renders images and bullets, ⌘-click opens links.
+  Decorations only — it never changes the text.
 - **Keyboard:** `setupKeyboardShortcuts()` — the single global keydown handler
 - **Sound:** `initAudio()`, `playTypeSound()` — synthesized with Web Audio (no audio files)
 - **Fonts / size:** `cycleFont()`, `applyFont()`, `increaseTextSize()`, `applyTextSize()`
@@ -62,7 +77,6 @@ Key areas in the script, by feature:
 - **Backgrounds:** `changeBackground()`
 - **Print shop:** `openPrintShop()`, `selectPhoto()`, `selectSize()`, lightbox functions
 - **Export:** `exportAs()`, `exportTXT()`, `exportMarkdown()`, `exportHTML()`, `downloadBlob()`
-- **Markdown preview:** `renderMarkdown()`, `togglePreview()` (Ctrl+M)
 - **Ideas panel:** `addIdea()`, `renderIdeas()`, hashtag functions, `renderGlobalIdeas()`
 
 ## Data model
@@ -98,6 +112,7 @@ page load** (so edits users make to it are not kept).
 ## Conventions
 
 - **Keep it one file.** No build step, no framework, no npm. Vanilla JS + CSS.
+  CodeMirror 6 (from esm.sh, exact versions) is the only external dependency.
 - **Keyboard-first.** New features should have a shortcut; mouse-only features are
   the exception (print shop, title rename).
 - **Minimal formatting is intentional.** Don't add rich-text features without asking.
@@ -118,6 +133,11 @@ page load** (so edits users make to it are not kept).
   behavior described in commit 2dc1089 is not present in the current code.
 - ⌘⇧P also toggles Projects and still has debug `console.log`s.
 - All 13 backgrounds (~3–5 MB each) are preloaded at startup.
+- The editor needs esm.sh on first load; offline it falls back to the plain textarea
+  (no live preview). The v2 desktop app should vendor CodeMirror instead.
+- Indented lines (Tab or 4 spaces) are prose, not code blocks — on purpose (the manual's
+  shortcut tables and Tab-indented paragraphs). Use ``` fences for code.
+- Images in documents load from their URLs while writing (remote requests).
 
 ## Current work in progress
 
