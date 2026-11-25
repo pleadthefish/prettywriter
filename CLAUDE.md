@@ -30,6 +30,8 @@ User Manual/manual.txt   Manual text, loaded into the pinned "User Manual" proje
 images/photo1-13.jpg     Background photos (© Drew Parrish, NOT MIT — see CONTENT-LICENSE.txt)
 typefaces/               Traveling Typewriter + Drafting Mono (.ttf)
 README.md                Public-facing overview and shortcut list
+CHANGELOG.md             User-facing changes, newest first — add an entry when shipping to main
+docs/superpowers/        Design specs and implementation plans
 LICENSE                  MIT (code)
 CONTENT-LICENSE.txt      All rights reserved (photography)
 ```

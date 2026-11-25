@@ -14,7 +14,7 @@ Always use the same browser/device to access your projects.
 ## Features
 
 - **Keyboard-first workflow** - Navigate primarily with shortcuts
-- **Live Markdown** - Markdown renders as you write; the symbols show only on the line you're editing, and your text is saved exactly as typed
+- **Live Markdown** - Markdown renders as you write, Obsidian-style: bold, italics, code and links take effect the moment you type past the closing mark, and the symbols reappear when your cursor touches them. Headings, quotes and lists render once you leave the line. Images show inline. Your text is saved exactly as typed
 - **Projects & folders** - Simple organization to your writing
 - **Ideas & notes panel** - Capture thoughts without losing focus. Promotes Rhizomatic thinking. 
 - **Hashtag system** - Tag and filter ideas across projects
@@ -96,7 +96,8 @@ This is an early version under active development. Feedback welcome!
 
 ### Known Limitations
 - No cloud sync or backup
-- No undo/redo (use browser's ⌘Z)
+- The editor (CodeMirror) loads from the web the first time; offline it falls back to a plain text box without live Markdown
+- Images in your documents load from their URLs while you write
 - Custom fonts require font files in `/typefaces/` folder
 - Background images require files in `/images/` folder
 

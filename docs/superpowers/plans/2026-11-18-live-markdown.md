@@ -1,5 +1,9 @@
 # Live Markdown Editing Implementation Plan
 
+> **Status: complete.** All four tasks done on `writing-polish` and merged to `main`
+> on 2026-11-24, with a follow-up change: inline syntax now reveals per span, not per
+> line (see the spec). The checkboxes below weren't ticked during the work.
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Replace the `<textarea>` writing surface with a CodeMirror 6 editor that renders Markdown in place, Obsidian-style, without ever changing the stored text.
