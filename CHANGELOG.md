@@ -1,5 +1,29 @@
 # Changelog
 
+## 2026-11-24 — Endnotes
+
+For long essays: endnotes written in standard Markdown footnote syntax
+(`text.[^1]` and a note line `[^1]: citation`) now render cleanly as you write.
+
+- **Superscript references.** `[^1]` shows as a small raised number. When your
+  cursor touches it, the raw Markdown shows so you can edit it.
+- **Numbered notes.** A note line shows its number in place of `[^1]:`, and the
+  citation and comments wrap under it with a hanging indent, slightly smaller
+  than body text.
+- **Numbered by order.** Numbers follow the order of the references in the essay,
+  whatever the labels are (word labels like `[^smith]` work too).
+- **⌘⇧6 adds a note.** It puts the reference at the cursor, opens the note line in
+  the notes area and moves you there. A note added between two others goes into
+  the list at its place, so the notes stay in order.
+- **Jump between them.** ⌘J goes from a number to its note and back. A single
+  click on a superscript or on a note's number does the same.
+- **Mismatches show faded:** a reference without a note, or a note nothing refers
+  to.
+- **Not yet:** endnotes in the HTML export or in copy-out for Substack and the
+  website. That's a separate piece of work.
+
+Design: `docs/superpowers/specs/2026-11-24-endnotes-design.md`
+
 ## 2026-11-24 — Live Markdown editor
 
 The writing surface is now a CodeMirror 6 editor that renders Markdown as you

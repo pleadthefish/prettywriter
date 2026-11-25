@@ -15,6 +15,7 @@ Always use the same browser/device to access your projects.
 
 - **Keyboard-first workflow** - Navigate primarily with shortcuts
 - **Live Markdown** - Markdown renders as you write, Obsidian-style: bold, italics, code and links take effect the moment you type past the closing mark, and the symbols reappear when your cursor touches them. Headings, quotes and lists render once you leave the line. Images show inline. Your text is saved exactly as typed
+- **Endnotes** - Add a note with `⌘⇧6`; references show as superscript numbers, notes are numbered in order and kept in order, and a click (or `⌘J`) jumps between a number and its note. Standard Markdown footnote syntax, so notes carry over to other tools
 - **Projects & folders** - Simple organization to your writing
 - **Ideas & notes panel** - Capture thoughts without losing focus. Promotes Rhizomatic thinking. 
 - **Hashtag system** - Tag and filter ideas across projects
@@ -46,6 +47,10 @@ Always use the same browser/device to access your projects.
 - `⌘.` - Increase text size
 - `⌘,` - Decrease text size
 - `⌘`-click - Open a link
+
+### Endnotes
+- `⌘⇧6` - Add an endnote at the cursor (`⌘^`)
+- `⌘J` - Jump between an endnote number and its note
 
 ## Getting Started
 

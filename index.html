@@ -230,6 +230,33 @@
             border-top: 1px solid rgba(255, 255, 255, 0.3);
         }
 
+        /* Endnotes: superscript references, numbered note lines with a hanging indent */
+        .cm-editor .cm-md-fnref {
+            font-size: 0.65em;
+            vertical-align: super;
+            line-height: 0;
+            padding: 0 0.1em;
+            cursor: pointer;
+        }
+
+        .cm-editor .cm-md-fndef {
+            font-size: 0.9em;
+            padding-left: 2em !important;
+            text-indent: -2em;
+        }
+
+        .cm-editor .cm-md-fndef-num {
+            display: inline-block;
+            width: 2em;
+            text-indent: 0;
+            color: rgba(255, 255, 255, 0.7);
+            cursor: pointer;
+        }
+
+        .cm-editor .cm-md-fn-missing {
+            opacity: 0.45;
+        }
+
         .prompt-display {
             position: fixed;
             bottom: 40px;
@@ -1685,6 +1712,32 @@
                 ignoreEvent() { return false; }
             }
 
+            // superscript reference (tag 'sup') or a note line's number (tag 'span');
+            // data-fn carries the label for click-to-jump
+            class NoteWidget extends WidgetType {
+                constructor(tag, text, className, label) {
+                    super();
+                    this.tag = tag; this.text = text; this.className = className; this.label = label;
+                }
+                eq(other) {
+                    return other.tag === this.tag && other.text === this.text &&
+                           other.className === this.className && other.label === this.label;
+                }
+                toDOM() {
+                    const el = document.createElement(this.tag);
+                    el.className = this.className;
+                    el.textContent = this.text;
+                    el.dataset.fn = this.label;
+                    return el;
+                }
+                ignoreEvent() { return false; }
+            }
+
+            footnoteField = CM.state.StateField.define({
+                create: function(state) { return scanFootnotes(state.doc.toString()); },
+                update: function(value, tr) { return tr.docChanged ? scanFootnotes(tr.newDoc.toString()) : value; }
+            });
+
             class RuleWidget extends WidgetType {
                 eq() { return true; }
                 toDOM() {
@@ -1788,9 +1841,13 @@
                                 }
                             } else if (name === 'HorizontalRule') {
                                 if (!isActive(f)) replace(f, t, rule);
-                            } else if (name === 'Link') {
-                                decorateLink(node.node, touches(f, t));
-                                return false;
+                            } else if (name === 'Link' || name === 'LinkReference') {
+                                // [^label] is an endnote, drawn below — not a link
+                                if (doc.sliceString(f, f + 2) === '[^') return false;
+                                if (name === 'Link') {
+                                    decorateLink(node.node, touches(f, t));
+                                    return false;
+                                }
                             } else if (name === 'Image') {
                                 decorateImage(node.node, touches(f, t));
                                 return false;
@@ -1805,6 +1862,36 @@
                         }
                     });
                 }
+
+                // Endnotes: references become superscript numbers unless the cursor
+                // touches them; note lines show their number unless the cursor is on the line.
+                const fn = state.field(footnoteField);
+                const visible = function(from, to) {
+                    return view.visibleRanges.some(function(r) { return from <= r.to && to >= r.from; });
+                };
+                const inInlineCode = function(pos) {
+                    for (let n = syntaxTree(state).resolveInner(pos, 1); n; n = n.parent) {
+                        if (n.name === 'InlineCode' || n.name === 'FencedCode') return true;
+                    }
+                    return false;
+                };
+                fn.refs.forEach(function(r) {
+                    if (!visible(r.from, r.to) || touches(r.from, r.to) || inInlineCode(r.from)) return;
+                    const cls = 'cm-md-fnref' + (fn.defs.has(r.label) ? '' : ' cm-md-fn-missing');
+                    replace(r.from, r.to, Decoration.replace({
+                        widget: new NoteWidget('sup', String(fn.numbers.get(r.label)), cls, r.label)
+                    }));
+                });
+                fn.defList.forEach(function(d) {
+                    if (!visible(d.lineFrom, d.lineTo)) return;
+                    out.push(lineClass('cm-md-fndef').range(d.lineFrom));
+                    if (isActive(d.lineFrom)) return;
+                    const n = fn.numbers.get(d.label);
+                    const cls = 'cm-md-fndef-num' + (n ? '' : ' cm-md-fn-missing');
+                    replace(d.lineFrom, d.markerTo, Decoration.replace({
+                        widget: new NoteWidget('span', n ? String(n) : d.label, cls, d.label)
+                    }));
+                });
 
                 // [text](url "title") — show text, hide the rest
                 function decorateLink(link, isOnCursor) {
@@ -1852,9 +1939,18 @@
                 return Decoration.set(out, true);
             }
 
-            // ⌘-click (Ctrl-click elsewhere) opens a link; a plain click just places the cursor
+            // ⌘-click (Ctrl-click elsewhere) opens a link; a plain click just places the cursor.
+            // A plain click on an endnote number jumps: reference -> note, note -> reference.
             const linkClicks = CM.view.EditorView.domEventHandlers({
                 mousedown: function(e) {
+                    const note = e.button === 0 && e.target.closest &&
+                                 e.target.closest('.cm-md-fnref, .cm-md-fndef-num');
+                    if (note) {
+                        e.preventDefault();
+                        if (note.classList.contains('cm-md-fnref')) jumpToFootnoteDef(note.dataset.fn);
+                        else jumpToFootnoteRef(note.dataset.fn);
+                        return true;
+                    }
                     if (!(e.metaKey || e.ctrlKey) || e.button !== 0) return false;
                     const el = e.target.closest && e.target.closest('[data-href]');
                     if (!el) return false;
@@ -1866,7 +1962,7 @@
                 }
             });
 
-            return [linkClicks, ViewPlugin.fromClass(class {
+            return [footnoteField, linkClicks, ViewPlugin.fromClass(class {
                 constructor(view) { this.decorations = build(view); }
                 update(u) {
                     if (u.docChanged || u.viewportChanged || u.selectionSet ||
@@ -1973,6 +2069,130 @@
         // Element that receives keydown while writing (typing sounds).
         function editorDom() {
             return cmView ? cmView.contentDOM : editor;
+        }
+
+        // === ENDNOTES ===
+        // Standard Markdown footnotes: "text.[^1]" and a note line "[^1]: citation".
+        // Notes are numbered by the order of first reference, whatever their labels.
+        // Rendering lives in buildLivePreview(); these work only with CodeMirror.
+
+        const FOOTNOTE_DEF_RE = /^ {0,3}\[\^([^\]\s]+)\]:[ \t]?/;
+        const FOOTNOTE_REF_RE = /\[\^([^\]\s]+)\]/g;
+        let footnoteField = null;   // CodeMirror StateField holding scanFootnotes() of the doc
+
+        // refs: [{label, from, to}] in document order
+        // defs: Map label -> {label, lineFrom, markerTo, lineTo} (first note line per label)
+        // defList: every note line, in order; numbers: Map label -> display number
+        function scanFootnotes(text) {
+            const refs = [], defs = new Map(), defList = [], numbers = new Map();
+            let pos = 0, inFence = false;
+            for (const line of text.split('\n')) {
+                if (/^ {0,3}(```|~~~)/.test(line)) {
+                    inFence = !inFence;
+                } else if (!inFence) {
+                    let start = 0;
+                    const d = FOOTNOTE_DEF_RE.exec(line);
+                    if (d) {
+                        const def = { label: d[1], lineFrom: pos, markerTo: pos + d[0].length, lineTo: pos + line.length };
+                        if (!defs.has(d[1])) defs.set(d[1], def);
+                        defList.push(def);
+                        start = d[0].length;
+                    }
+                    FOOTNOTE_REF_RE.lastIndex = start;
+                    let m;
+                    while ((m = FOOTNOTE_REF_RE.exec(line))) {
+                        refs.push({ label: m[1], from: pos + m.index, to: pos + m.index + m[0].length });
+                        if (!numbers.has(m[1])) numbers.set(m[1], numbers.size + 1);
+                    }
+                }
+                pos += line.length + 1;
+            }
+            return { refs: refs, defs: defs, defList: defList, numbers: numbers };
+        }
+
+        function moveEditorCursor(pos) {
+            const { EditorView } = CM.view;
+            cmView.dispatch({
+                selection: { anchor: pos },
+                effects: EditorView.scrollIntoView(pos, { y: 'center' })
+            });
+            cmView.focus();
+        }
+
+        function jumpToFootnoteDef(label) {
+            const def = cmView.state.field(footnoteField).defs.get(label);
+            if (def) moveEditorCursor(def.lineTo);
+        }
+
+        function jumpToFootnoteRef(label) {
+            const ref = cmView.state.field(footnoteField).refs.find(function(r) { return r.label === label; });
+            if (ref) moveEditorCursor(ref.to);
+        }
+
+        // ⌘⇧6: reference at the cursor, note line after the last note (or at the end),
+        // cursor moved into the new note. One undo step.
+        function insertFootnote() {
+            if (!cmView || !footnoteField) return;
+            const state = cmView.state, doc = state.doc;
+            const fn = state.field(footnoteField);
+            let max = 0;
+            fn.refs.concat(fn.defList).forEach(function(x) {
+                if (/^\d+$/.test(x.label)) max = Math.max(max, parseInt(x.label, 10));
+            });
+            const label = String(max + 1);
+            const refText = '[^' + label + ']';
+            const at = state.selection.main.to;
+
+            const marker = '[^' + label + ']: ';
+            let defAt, defText, cursorInDef;
+            const lastDef = fn.defList[fn.defList.length - 1];
+            // the note that will come right after the new one, so the notes stay in order
+            const seen = new Set();
+            const nextRef = fn.refs.find(function(r) {
+                if (seen.has(r.label)) return false;
+                seen.add(r.label);
+                return r.from >= at && fn.defs.has(r.label);
+            });
+            const nextDef = nextRef && fn.defs.get(nextRef.label);
+            if (nextDef && nextDef.lineFrom >= at) {
+                defAt = nextDef.lineFrom;
+                defText = marker + '\n';
+                cursorInDef = marker.length;
+            } else if (lastDef && at <= lastDef.lineTo) {
+                // join the end of the existing notes area
+                defAt = lastDef.lineTo;
+                defText = '\n' + marker;
+                cursorInDef = defText.length;
+            } else {
+                // no notes yet (or writing below them): start at the end, after a blank line
+                const tail = doc.sliceString(Math.max(0, doc.length - 2));
+                const gap = tail === '\n\n' ? '' : doc.length && tail.slice(-1) === '\n' ? '\n' : '\n\n';
+                defAt = doc.length;
+                defText = gap + marker;
+                cursorInDef = defText.length;
+            }
+
+            // positions after the change: the ref goes in first (at <= defAt)
+            const cursor = defAt + refText.length + cursorInDef;
+            cmView.dispatch({
+                changes: [{ from: at, insert: refText }, { from: defAt, insert: defText }],
+                selection: { anchor: cursor },
+                effects: CM.view.EditorView.scrollIntoView(cursor, { y: 'center' }),
+                userEvent: 'input'
+            });
+            cmView.focus();
+        }
+
+        // ⌘J: from a reference to its note, or from a note line back to its reference.
+        function jumpFootnote() {
+            if (!cmView || !footnoteField) return;
+            const state = cmView.state, pos = state.selection.main.head;
+            const fn = state.field(footnoteField);
+            const ref = fn.refs.find(function(r) { return r.from <= pos && pos <= r.to; });
+            if (ref) { jumpToFootnoteDef(ref.label); return; }
+            const line = state.doc.lineAt(pos);
+            const def = fn.defList.find(function(d) { return d.lineFrom === line.from; });
+            if (def) jumpToFootnoteRef(def.label);
         }
 
 let ideas = [];
@@ -2194,6 +2414,17 @@ async function init() {
                 if (mod && e.key === 'f') {
                     e.preventDefault();
                     toggleFullscreen();
+                }
+
+                // Endnotes: ⌘⇧6 (⌘^) inserts the next note, ⌘J jumps reference <-> note
+                if (mod && e.shiftKey && e.code === 'Digit6') {
+                    e.preventDefault();
+                    insertFootnote();
+                }
+
+                if (mod && !e.shiftKey && e.key === 'j') {
+                    e.preventDefault();
+                    jumpFootnote();
                 }
 
                 // Text size controls

@@ -66,6 +66,12 @@ Key areas in the script, by feature:
   (`#`, `>`, bullets, rules, fences) hide off the cursor line(s). Styles
   headings/emphasis/quotes/code, renders images and bullets, ⌘-click opens links.
   Decorations only — it never changes the text.
+- **Endnotes:** `// === ENDNOTES ===` — `scanFootnotes()` finds `[^label]` refs and
+  `[^label]:` note lines (skipping fences); the result lives in `footnoteField` (a
+  StateField) and drives numbering (order of first reference). Refs render as `<sup>`
+  numbers, note lines get a hanging indent; single click on either jumps.
+  `insertFootnote()` (⌘⇧6) places the new note in order; `jumpFootnote()` (⌘J).
+  CodeMirror only — the textarea fallback has no endnote support.
 - **Keyboard:** `setupKeyboardShortcuts()` — the single global keydown handler
 - **Sound:** `initAudio()`, `playTypeSound()` — synthesized with Web Audio (no audio files)
 - **Fonts / size:** `cycleFont()`, `applyFont()`, `increaseTextSize()`, `applyTextSize()`

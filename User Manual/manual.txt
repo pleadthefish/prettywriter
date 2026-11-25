@@ -16,7 +16,7 @@ ESSENTIAL COMMANDS
     ⌘S          Save current project
     ⌘K          Toggle Ideas panel
     Esc Esc     Toggle Projects panel (double-tap Escape)
-    ⌘           Toggle History panel
+    ⌘\          Toggle History panel
     ⌘E          Export menu
     ⌘F          Fullscreen (browser shortcut)
 
@@ -34,6 +34,10 @@ TEXT CONTROLS
     ⌘,          Decrease text size
     ⌘-click     Open a link
 
+ENDNOTES
+    ⌘⇧6         Add an endnote here (⌘^)
+    ⌘J          Jump between an endnote number and its note
+
 
 ═══════════════════════════════════════════════════════════════════════════════
 WRITING IN MARKDOWN
@@ -50,6 +54,25 @@ PrettyWriter renders Markdown as you type. Bold, italics, code and links take ef
     `---`               Divider line
     `[text](url)`       Link (⌘-click to open)
     `![alt](url)`       Image
+    `text[^1]`          Endnote reference (see below)
+    `[^1]: note`        The endnote itself
+
+
+═══════════════════════════════════════════════════════════════════════════════
+ENDNOTES
+═══════════════════════════════════════════════════════════════════════════════
+For longer essays, PrettyWriter keeps endnotes in standard Markdown, so they carry over to Obsidian and other Markdown tools.
+
+Press ⌘⇧6 where a note belongs. A superscript number appears in your sentence, a new note line opens in the notes area at the end of the document, and your cursor moves there. Write the citation and any of your own comments, then press ⌘J to jump back and keep writing.
+
+    ⌘⇧6         Add an endnote at the cursor
+    ⌘J          Jump from a number to its note, or from a note back to the text
+    Click       Click a superscript number to go to its note; click a note's
+                number to go back
+
+Notes are numbered in the order they appear in the essay. Add a note between 2 and 3 and it becomes the new 3: everything after it renumbers, and the new note takes its place in the list.
+
+You can also type notes by hand: `[^1]` in the text and `[^1]:` at the start of a line in the notes area. Labels can be words, like `[^smith]`; they still display as numbers. When your cursor touches a reference, or sits on a note line, the raw Markdown shows so you can edit it. A number shown faded means a reference with no matching note, or a note nothing refers to.
 
 
 ═══════════════════════════════════════════════════════════════════════════════
