@@ -20,11 +20,14 @@ composition, consistent with v2's Obsidian-compatible `.md` storage.
 - Markdown renders inline while writing: headings, **bold**, *italic*,
   ~~strikethrough~~, `inline code`, links, images, block quotes, bulleted and
   numbered lists, horizontal rules, fenced code blocks.
-- Syntax markers are hidden except on the line(s) the cursor or selection touches;
-  there the raw Markdown shows so it can be edited.
+- Inline syntax (emphasis, strike, code, links, images, bare URLs) is hidden unless
+  the cursor or selection touches that span, so `**bold** ` renders as soon as you
+  type past the closing mark (revised 2026-11-24, to match Obsidian). Block markers
+  (`#`, `>`, bullets, rules, code fences) are hidden except on the line(s) the cursor
+  or selection touches. Where shown, the raw Markdown can be edited.
 - Links show their text (underlined), URL hidden; ⌘-click opens in a new tab.
   Bare URLs longer than a threshold display as `domain…` when the cursor is away.
-- Images render inline, scaled to the column width; cursor on the line reveals the
+- Images render inline, scaled to the column width; cursor on the image reveals the
   `![](…)` source above the image.
 - Headings: same typeface as the body, larger sizes.
 - The typewriter feel stays: fonts (⌘[ / ⌘] cycle), text size, typing sounds,

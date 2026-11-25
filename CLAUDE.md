@@ -59,7 +59,9 @@ Key areas in the script, by feature:
   deliberately minimal (history + standard editing, Tab/Enter insert literal `\t`/`\n`)
   so CodeMirror never shadows PW shortcuts.
 - **Live preview:** `buildLivePreview()` — one ViewPlugin over the Markdown syntax tree
-  (GFM, indented-code rule removed). Hides syntax off the cursor line(s), styles
+  (GFM, indented-code rule removed). Inline syntax (emphasis, code, links, images,
+  URLs) hides unless the selection touches that span (`touches()`); block markers
+  (`#`, `>`, bullets, rules, fences) hide off the cursor line(s). Styles
   headings/emphasis/quotes/code, renders images and bullets, ⌘-click opens links.
   Decorations only — it never changes the text.
 - **Keyboard:** `setupKeyboardShortcuts()` — the single global keydown handler

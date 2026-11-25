@@ -38,7 +38,7 @@ TEXT CONTROLS
 ═══════════════════════════════════════════════════════════════════════════════
 WRITING IN MARKDOWN
 ═══════════════════════════════════════════════════════════════════════════════
-PrettyWriter renders Markdown as you type. The symbols disappear when your cursor leaves a line and come back when you return to it, so you can always edit them. Your text is saved exactly as you typed it.
+PrettyWriter renders Markdown as you type. Bold, italics, code and links take effect as soon as you type past the closing mark, and their symbols come back when your cursor touches them, so you can always edit them. Line symbols like # for headings and > for quotes hide when your cursor leaves the line. Your text is saved exactly as you typed it.
 
     `# Heading`         Heading (`##` and `###` for smaller)
     `**bold**`          Bold

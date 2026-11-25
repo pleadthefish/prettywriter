@@ -1718,6 +1718,15 @@
                 const state = view.state, doc = state.doc;
                 const active = activeLines(state);
                 const isActive = function(pos) { return active.has(doc.lineAt(pos).number); };
+                // inline syntax shows only while the cursor/selection touches the span,
+                // so "**bold** " renders the moment you type past the closing mark
+                const touches = function(from, to) {
+                    return state.selection.ranges.some(function(r) { return r.from <= to && r.to >= from; });
+                };
+                const touchesParent = function(node) {
+                    const p = node.node.parent;
+                    return p ? touches(p.from, p.to) : isActive(node.from);
+                };
                 const out = [];
                 const add = function(from, to, deco) { if (to >= from) out.push(deco.range(from, to)); };
                 const sameLine = function(from, to) { return doc.lineAt(from).number === doc.lineAt(to).number; };
@@ -1759,9 +1768,11 @@
                             } else if (name === 'InlineCode') {
                                 add(f, t, mark('cm-md-code'));
                             } else if (name === 'EmphasisMark' || name === 'StrikethroughMark') {
-                                if (!isActive(f)) replace(f, t, hide);
+                                if (!touchesParent(node)) replace(f, t, hide);
                             } else if (name === 'CodeMark') {
-                                if (!isActive(f)) replace(f, t, hide);
+                                // inline code: per span; fenced block fences: per line
+                                const hidden = parent === 'InlineCode' ? !touchesParent(node) : !isActive(f);
+                                if (hidden) replace(f, t, hide);
                             } else if (name === 'CodeInfo') {
                                 if (!isActive(f)) replace(f, t, hide);
                             } else if (name === 'FencedCode') {
@@ -1778,14 +1789,14 @@
                             } else if (name === 'HorizontalRule') {
                                 if (!isActive(f)) replace(f, t, rule);
                             } else if (name === 'Link') {
-                                decorateLink(node.node, isActive(f));
+                                decorateLink(node.node, touches(f, t));
                                 return false;
                             } else if (name === 'Image') {
-                                decorateImage(node.node, isActive(f));
+                                decorateImage(node.node, touches(f, t));
                                 return false;
                             } else if (name === 'URL' && parent !== 'Image') {
                                 const url = doc.sliceString(f, t);
-                                if (url.length > BARE_URL_SHORTEN_AT && !isActive(f)) {
+                                if (url.length > BARE_URL_SHORTEN_AT && !touches(f, t)) {
                                     replace(f, t, Decoration.replace({ widget: new TextWidget(shortUrl(url), 'cm-md-url-short', url) }));
                                 } else {
                                     add(f, t, mark('cm-md-link', { 'data-href': url }));
@@ -1804,7 +1815,7 @@
                     const textFrom = marks[0].to, textTo = marks[1].from;
                     const href = urlNode ? doc.sliceString(urlNode.from, urlNode.to) : '';
                     if (textTo > textFrom) add(textFrom, textTo, mark('cm-md-link', href ? { 'data-href': href } : null));
-                    if (isOnCursor || !urlNode) return;   // reference links / cursor line: keep raw
+                    if (isOnCursor || !urlNode) return;   // reference links / cursor on link: keep raw
                     if (!sameLine(link.from, link.to)) return;   // wrapped link: keep raw
                     replace(marks[0].from, marks[0].to, hide);
                     replace(marks[1].from, link.to, hide);
@@ -1815,8 +1826,8 @@
                         inner = inner.nextSibling;
                     }
                 }
-                // ![alt](src) — off the cursor line the image replaces its source;
-                // on the cursor line the source stays editable with the image after it
+                // ![alt](src) — away from the cursor the image replaces its source;
+                // with the cursor on it the source stays editable with the image after it
                 function decorateImage(image, isOnCursor) {
                     const urlNode = image.getChild('URL');
                     if (!urlNode) return;
