@@ -15,15 +15,17 @@ PrettyWriter is designed to keep your fingers on the keys. You're not writing if
 ESSENTIAL COMMANDS
     ⌘S          Save current project
     ⌘K          Toggle Ideas panel
-    Esc Esc     Toggle Projects panel (double-tap Escape)
+    ⌃ ⌃         Toggle Projects panel (double-tap Control)
     ⌘\          Toggle History panel
     ⌘E          Export menu
-    ⌘F          Fullscreen (browser shortcut)
+    ⌘F          Find (and replace) in the whole document; ⌘F again closes it
+    ⌘G / ⌘⇧G    Next / previous match (Esc closes Find)
+    ⌃⌘F         Fullscreen
 
 WRITING ENVIRONMENT
     ⌘B          Change background image
     ⌘P          Show random writing prompt
-    ⌘F          Toggle fullscreen
+    ⌃⌘F         Toggle fullscreen
     ⌘/          Toggle typing sound effects (FX)
     fn↑/↓       Page Up / Page Down (browser shortcut)
 
@@ -72,11 +74,15 @@ Press ⌘⇧6 where a note belongs. A superscript number appears in your sentenc
 
 Notes are numbered in the order they appear in the essay. Add a note between 2 and 3 and it becomes the new 3: everything after it renumbers, and the new note takes its place in the list.
 
-You can also type notes by hand: `[^1]` in the text and `[^1]:` at the start of a line in the notes area. Labels can be words, like `[^smith]`; they still display as numbers. When your cursor touches a reference, or sits on a note line, the raw Markdown shows so you can edit it. A number shown faded means a reference with no matching note, or a note nothing refers to.
+You can also type a reference by hand: `[^1]` in the text. As soon as you type the closing bracket, its note line appears in the notes section and your cursor stays where you're writing. The notes section takes care of itself: it starts at the end of the document with your first note, under a "Notes" divider that the editor draws (it isn't part of your text), and its notes always stay in the same order as their numbers. Move a sentence and its note moves with it.
+
+Delete a reference and its note goes too if you never wrote anything in it. A note with writing in it is kept, shown faded at the end of the list, so a citation is never lost by accident.
+
+Labels can be words, like `[^smith]`; they still display as numbers. When your cursor touches a reference, or sits on a note line, the raw Markdown shows so you can edit it. A number shown faded means a reference with no matching note, or a note nothing refers to.
 
 
 ═══════════════════════════════════════════════════════════════════════════════
-PROJECTS PANEL (Esc Esc)
+PROJECTS PANEL (⌃ ⌃)
 ═══════════════════════════════════════════════════════════════════════════════
 The Projects panel is a basic file and document saving structure to organize all your writing into separate projects and folders. Each project saves its own text, ideas and notes, background, and font settings.
 
@@ -122,6 +128,9 @@ HASHTAGS
 TWO LISTS
     1. CURRENT PROJECT — Ideas for the project you're working on
     2. RECENT IDEAS — Ideas from other projects (click to jump to that project)
+       Click ENDNOTES beside the label to swap this list for the current
+       document's endnotes, in order; click a note to jump to it. Click
+       RECENT IDEAS to switch back. PrettyWriter remembers your choice.
 
 
 ═══════════════════════════════════════════════════════════════════════════════
@@ -165,11 +174,11 @@ TIPS FOR FOCUSED WRITING
 ═══════════════════════════════════════════════════════════════════════════════
 
     1. Start with a prompt (⌘P) if you're stuck
-    2. Toggle fullscreen (⌘F) to eliminate distractions
+    2. Toggle fullscreen (⌃⌘F) to eliminate distractions
     3. Use Ideas panel (⌘K) to capture tangential thoughts without losing focus
     4. Create project folders by theme (Journal, Fiction, Work, etc.)
     5. Typing sounds (⌘/) can help establish rhythm (or turn them off)
 
 ═══════════════════════════════════════════════════════════════════════════════
-You're all set. Double-tap Esc to open the Projects Panel and Press N to open your first project.
+You're all set. Double-tap Control (⌃) to open the Projects Panel and Press N to open your first project.
 ═══════════════════════════════════════════════════════════════════════════════

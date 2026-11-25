@@ -59,7 +59,10 @@ Key areas in the script, by feature:
   the editor through the helpers:** `getEditorText()`, `setEditorText()` (resets undo),
   `focusEditor()`, `setEditorFont()`, `setEditorFontSize()`, `editorDom()`. Keymap is
   deliberately minimal (history + standard editing, Tab/Enter insert literal `\t`/`\n`)
-  so CodeMirror never shadows PW shortcuts.
+  so CodeMirror never shadows PW shortcuts. Find is `@codemirror/search` (top panel,
+  ⌘F / ⌘G / ⌘⇧G / Esc only — not the full `searchKeymap`), restyled under
+  `/* FIND */` in the CSS; the global handler also opens it for ⌘F outside the editor.
+  Fullscreen is ⌃⌘F.
 - **Live preview:** `buildLivePreview()` — one ViewPlugin over the Markdown syntax tree
   (GFM, indented-code rule removed). Inline syntax (emphasis, code, links, images,
   URLs) hides unless the selection touches that span (`touches()`); block markers
@@ -71,6 +74,11 @@ Key areas in the script, by feature:
   StateField) and drives numbering (order of first reference). Refs render as `<sup>`
   numbers, note lines get a hanging indent; single click on either jumps.
   `insertFootnote()` (⌘⇧6) places the new note in order; `jumpFootnote()` (⌘J).
+  `syncFootnotesFilter()` (a transactionFilter, so it shares the edit's undo step) adds
+  a note line for any reference without one, keeps the notes section
+  (`findNotesSection()`: last run of note lines) sorted by reference order, and drops
+  empty notes nothing refers to. The "Notes" divider is a CSS `::before` on that
+  section's first line (`.cm-md-fn-first`).
   CodeMirror only — the textarea fallback has no endnote support.
 - **Keyboard:** `setupKeyboardShortcuts()` — the single global keydown handler
 - **Sound:** `initAudio()`, `playTypeSound()` — synthesized with Web Audio (no audio files)
@@ -83,7 +91,9 @@ Key areas in the script, by feature:
 - **Backgrounds:** `changeBackground()`
 - **Print shop:** `openPrintShop()`, `selectPhoto()`, `selectSize()`, lightbox functions
 - **Export:** `exportAs()`, `exportTXT()`, `exportMarkdown()`, `exportHTML()`, `downloadBlob()`
-- **Ideas panel:** `addIdea()`, `renderIdeas()`, hashtag functions, `renderGlobalIdeas()`
+- **Ideas panel:** `addIdea()`, `renderIdeas()`, hashtag functions, `renderGlobalIdeas()`.
+  `// === ENDNOTES PANEL ===`: the lower list toggles Recent Ideas / Endnotes
+  (`setIdeasListMode()`, `renderEndnotesPanel()`, localStorage key `ideasListMode`)
 
 ## Data model
 
@@ -97,6 +107,7 @@ Key areas in the script, by feature:
 | `textSize` | `small` / `medium` / `large` |
 | `soundEnabled` | `true` / `false` |
 | `hasVisited` | first-visit flag (opens the manual) |
+| `ideasListMode` | `recent` / `endnotes` (Ideas panel lower list) |
 
 Project:
 ```js

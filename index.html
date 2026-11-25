@@ -145,6 +145,88 @@
             background: rgba(255, 255, 255, 0.28);
         }
 
+        /* FIND (⌘F) — CodeMirror's search panel, restyled to match the app.
+           Three classes deep to beat CodeMirror's injected base theme. */
+        .editor-container .cm-editor .cm-panels {
+            background: rgba(0, 0, 0, 0.55);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            color: rgba(255, 255, 255, 0.7);
+            border: none;
+            border-radius: 6px;
+            margin-bottom: 12px;
+        }
+
+        .editor-container .cm-editor .cm-panels-top {
+            border-bottom: none;
+        }
+
+        .editor-container .cm-editor .cm-search {
+            font-family: 'Georgia', serif;
+            font-size: 12px;
+            line-height: 1.6;
+            padding: 8px 10px;
+        }
+
+        .editor-container .cm-editor .cm-search br {
+            display: none;   /* Find and Replace share one row when they fit */
+        }
+
+        .editor-container .cm-editor .cm-textfield {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 6px;
+            color: white;
+            font-family: 'Georgia', serif;
+            font-size: 12px;
+            padding: 4px 8px;
+        }
+
+        .editor-container .cm-editor .cm-textfield:focus {
+            outline: none;
+            border-color: rgba(255, 255, 255, 0.35);
+        }
+
+        .editor-container .cm-editor .cm-button {
+            background: rgba(255, 255, 255, 0.08);
+            background-image: none;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 6px;
+            color: rgba(255, 255, 255, 0.8);
+            font-family: 'Georgia', serif;
+            font-size: 12px;
+            padding: 3px 8px;
+            cursor: pointer;
+        }
+
+        .editor-container .cm-editor .cm-button:hover {
+            background: rgba(255, 255, 255, 0.16);
+        }
+
+        .editor-container .cm-editor .cm-search label {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 12px;
+        }
+
+        .editor-container .cm-editor .cm-search input[type=checkbox] {
+            accent-color: rgba(255, 255, 255, 0.7);
+        }
+
+        .editor-container .cm-editor .cm-search button[name=close] {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 18px;
+            cursor: pointer;
+        }
+
+        .editor-container .cm-editor .cm-searchMatch {
+            background: rgba(255, 214, 102, 0.25);
+            outline: none;
+        }
+
+        .editor-container .cm-editor .cm-searchMatch-selected {
+            background: rgba(255, 214, 102, 0.55);
+        }
+
         /* LIVE PREVIEW — Markdown styled in place (see buildLivePreview) */
         .cm-editor .cm-md-h1,
         .cm-editor .cm-md-h2,
@@ -255,6 +337,29 @@
 
         .cm-editor .cm-md-fn-missing {
             opacity: 0.45;
+        }
+
+        /* "Notes" divider above the notes section: drawn by the editor, not in the text */
+        .cm-editor .cm-md-fn-first {
+            position: relative;
+            padding-top: 3em !important;
+        }
+
+        .cm-editor .cm-md-fn-first::before {
+            content: 'Notes';
+            position: absolute;
+            left: 0;
+            right: 0;
+            top: 0.9em;
+            padding-top: 0.5em;
+            border-top: 1px solid rgba(255, 255, 255, 0.3);
+            text-indent: 0;
+            font-size: 0.75em;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: rgba(255, 255, 255, 0.55);
+            line-height: 1;
+            pointer-events: none;
         }
 
         .prompt-display {
@@ -582,6 +687,88 @@
             letter-spacing: 0.5px;
             font-weight: normal;
             border-top: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        /* Recent Ideas · Endnotes toggle — sits inside an .ideas-section-label and
+           takes on its font and size exactly, so the label's height doesn't change */
+        .ideas-mode-btn {
+            background: none;
+            border: none;
+            padding: 0;
+            margin: 0;
+            font: inherit;
+            line-height: inherit;
+            letter-spacing: inherit;
+            text-transform: inherit;
+            color: rgba(255, 255, 255, 0.3);
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+
+        .ideas-mode-btn:hover {
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .ideas-mode-btn.active {
+            color: rgba(255, 255, 255, 0.75);
+            cursor: default;
+        }
+
+        .ideas-mode-btn:focus {
+            outline: none;
+        }
+
+        .ideas-mode-btn:focus-visible {
+            color: rgba(255, 255, 255, 0.9);
+            text-decoration: underline;
+        }
+
+        .ideas-mode-sep {
+            color: rgba(255, 255, 255, 0.25);
+            margin: 0 6px;
+        }
+
+        /* ENDNOTES LIST - the current document's notes, in display order */
+        .endnote-item {
+            display: flex;
+            gap: 10px;
+            padding: 8px 10px;
+            margin-bottom: 4px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .endnote-item:hover {
+            background: rgba(255, 255, 255, 0.06);
+        }
+
+        .endnote-num {
+            flex: 0 0 auto;
+            min-width: 1.6em;
+            text-align: right;
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 12px;
+            line-height: 1.9;
+        }
+
+        .endnote-text {
+            flex: 1;
+            min-width: 0;
+            color: #e0e0e0;
+            font-size: 14px;
+            line-height: 1.6;
+            white-space: pre-wrap;
+            overflow-wrap: anywhere;
+        }
+
+        .endnote-item.faded {
+            opacity: 0.45;
+        }
+
+        .endnote-placeholder {
+            color: rgba(255, 255, 255, 0.4);
+            font-style: italic;
         }
 
         .ideas-list {
@@ -1362,7 +1549,7 @@
 
     <!-- KEYBOARD SHORTCUTS REMINDER -->
     <div class="shortcuts-hint">
-        ⌘K Ideas · Esc Esc Projects · ⌘\ History · ⌘P Prompt · ⌘B Background · ⌘E Export · ⌘/ Sound · ⌘S Save · ⌘F Fullscreen
+        ⌘K Ideas · ⌃⌃ Projects · ⌘\ History · ⌘P Prompt · ⌘B Background · ⌘E Export · ⌘/ Sound · ⌘S Save · ⌘F Find · ⌃⌘F Fullscreen
     </div>
 
     <!-- PHOTO CREDIT -->
@@ -1470,10 +1657,11 @@
             <div class="empty-state">No ideas yet. Press ⌘K to start capturing.</div>
         </div>
 
-        <div class="ideas-section-label">Recent Ideas</div>
+        <div class="ideas-section-label" id="ideasListToggle"><button type="button" class="ideas-mode-btn active" data-mode="recent" aria-pressed="true">Recent Ideas</button><span class="ideas-mode-sep">·</span><button type="button" class="ideas-mode-btn" data-mode="endnotes" aria-pressed="false">Endnotes</button></div>
         <div class="ideas-list" id="globalIdeasList">
             <div class="empty-state">No recent ideas.</div>
         </div>
+        <div class="ideas-list" id="endnotesList" style="display: none;"></div>
     </div>
 
     <!-- CUSTOM PROMPT MODAL -->
@@ -1621,12 +1809,13 @@
             view: 'https://esm.sh/@codemirror/view@6.43.15?deps=@codemirror/state@6.7.6',
             language: 'https://esm.sh/@codemirror/language@6.13.1?deps=@codemirror/state@6.7.6,@codemirror/view@6.43.15',
             markdown: 'https://esm.sh/@codemirror/lang-markdown@6.5.2?deps=@codemirror/state@6.7.6,@codemirror/view@6.43.15,@codemirror/language@6.13.1',
-            commands: 'https://esm.sh/@codemirror/commands@6.11.1?deps=@codemirror/state@6.7.6,@codemirror/view@6.43.15,@codemirror/language@6.13.1'
+            commands: 'https://esm.sh/@codemirror/commands@6.11.1?deps=@codemirror/state@6.7.6,@codemirror/view@6.43.15,@codemirror/language@6.13.1',
+            search: 'https://esm.sh/@codemirror/search@6.7.2?deps=@codemirror/state@6.7.6,@codemirror/view@6.43.15'
         };
         const CM_TIMEOUT_MS = 8000;
 
         let cmView = null;   // EditorView when CodeMirror is active
-        let CM = null;       // loaded CodeMirror modules: { state, view, language, markdown, commands }
+        let CM = null;       // loaded CodeMirror modules: { state, view, language, markdown, commands, search }
         const pwCMExtensions = [];  // extra extensions (live preview) added before the view is built
 
         const pwEditorReady = new Promise(function(resolve) {
@@ -1649,11 +1838,11 @@
 
         async function loadCodeMirror() {
             const state = await import(CM_URLS.state);
-            const [view, language, markdown, commands] = await Promise.all([
+            const [view, language, markdown, commands, search] = await Promise.all([
                 import(CM_URLS.view), import(CM_URLS.language),
-                import(CM_URLS.markdown), import(CM_URLS.commands)
+                import(CM_URLS.markdown), import(CM_URLS.commands), import(CM_URLS.search)
             ]);
-            CM = { state, view, language, markdown, commands };
+            CM = { state, view, language, markdown, commands, search };
             pwCMExtensions.push(buildLivePreview());
         }
 
@@ -1892,6 +2081,11 @@
                         widget: new NoteWidget('span', n ? String(n) : d.label, cls, d.label)
                     }));
                 });
+                // a thin rule and a "Notes" label above the notes section (display only)
+                const section = findNotesSection(doc, fn);
+                if (section && visible(section.from, section.from)) {
+                    out.push(lineClass('cm-md-fn-first').range(section.from));
+                }
 
                 // [text](url "title") — show text, hide the rest
                 function decorateLink(link, isOnCursor) {
@@ -1962,7 +2156,7 @@
                 }
             });
 
-            return [footnoteField, linkClicks, ViewPlugin.fromClass(class {
+            return [footnoteField, CM.state.EditorState.transactionFilter.of(syncFootnotesFilter), linkClicks, ViewPlugin.fromClass(class {
                 constructor(view) { this.decorations = build(view); }
                 update(u) {
                     if (u.docChanged || u.viewportChanged || u.selectionSet ||
@@ -1978,6 +2172,7 @@
             const { EditorView, keymap, placeholder } = CM.view;
             const { history, historyKeymap, standardKeymap, deleteCharBackwardStrict } = CM.commands;
             const { markdown, markdownLanguage } = CM.markdown;
+            const { search, closeSearchPanel, findNext, findPrevious } = CM.search;
 
             return EditorState.create({
                 doc: text,
@@ -1994,7 +2189,13 @@
                     // Indented lines are prose here, not code blocks (Tab-indented paragraphs, the manual).
                     markdown({ base: markdownLanguage, addKeymap: false, extensions: [{ remove: ['IndentedCode'] }] }),
                     history(),
+                    // Find (⌘F, toggles) searches the whole document; the browser's own find only
+                    // sees the lines CodeMirror has drawn. ⌘G / ⌘⇧G next / previous.
+                    search({ top: true }),
                     keymap.of([
+                        { key: 'Mod-f', run: toggleFind, scope: 'editor search-panel', preventDefault: true },
+                        { key: 'Mod-g', run: findNext, shift: findPrevious, scope: 'editor search-panel', preventDefault: true },
+                        { key: 'Escape', run: closeSearchPanel, scope: 'editor search-panel' },
                         { key: 'Tab', run: insertLiteral('\t'), shift: insertLiteral('\t') },
                         { key: 'Enter', run: insertLiteral('\n'), shift: insertLiteral('\n') },
                         { key: 'Backspace', run: deleteCharBackwardStrict, shift: deleteCharBackwardStrict },
@@ -2012,6 +2213,18 @@
                     ...pwCMExtensions
                 ]
             });
+        }
+
+        // ⌘F opens Find, or closes it (back to the text) when it's already open
+        function toggleFind(view) {
+            const { searchPanelOpen, openSearchPanel, closeSearchPanel } = CM.search;
+            if (searchPanelOpen(view.state)) {
+                closeSearchPanel(view);
+                view.focus();
+            } else {
+                openSearchPanel(view);
+            }
+            return true;
         }
 
         function insertLiteral(str) {
@@ -2034,6 +2247,7 @@
         function onEditorInput() {
             saveCurrentProject();
             updateWordCount();
+            renderEndnotesPanel();
         }
 
         function getEditorText() {
@@ -2098,9 +2312,16 @@
                         defList.push(def);
                         start = d[0].length;
                     }
+                    // `inline code` spans are examples, not references
+                    const code = [];
+                    const codeRe = /(`+)[^`][\s\S]*?\1(?!`)/g;
+                    let c;
+                    while ((c = codeRe.exec(line))) code.push([c.index, c.index + c[0].length]);
                     FOOTNOTE_REF_RE.lastIndex = start;
                     let m;
                     while ((m = FOOTNOTE_REF_RE.exec(line))) {
+                        const inCode = code.some(function(r) { return m.index >= r[0] && m.index < r[1]; });
+                        if (inCode) continue;
                         refs.push({ label: m[1], from: pos + m.index, to: pos + m.index + m[0].length });
                         if (!numbers.has(m[1])) numbers.set(m[1], numbers.size + 1);
                     }
@@ -2108,6 +2329,103 @@
                 pos += line.length + 1;
             }
             return { refs: refs, defs: defs, defList: defList, numbers: numbers };
+        }
+
+        // The notes section: the last run of note lines, allowing blank lines between
+        // them. Returns {first, last} indexes into fn.defList plus {from, to} positions.
+        function findNotesSection(doc, fn) {
+            const list = fn.defList;
+            if (!list.length) return null;
+            let first = list.length - 1;
+            while (first > 0) {
+                const prev = list[first - 1];
+                const between = doc.sliceString(prev.lineTo, list[first].lineFrom);
+                if (!/^\n+$/.test(between)) break;
+                first--;
+            }
+            return { first: first, last: list.length - 1, from: list[first].lineFrom, to: list[list.length - 1].lineTo };
+        }
+
+        // Keeps the notes section in step with the references (runs inside every user
+        // edit, so the follow-up change is part of the same undo step):
+        //   - a reference with no note gets an empty "[^label]: " line in the notes section
+        //     (the section starts at the end of the document if there is none yet)
+        //   - note lines in the section are sorted by order of first reference;
+        //     notes nothing refers to go last
+        //   - an empty note line is removed once nothing refers to it (or another note
+        //     line has its label), unless the cursor is on it. Notes with text are kept.
+        function syncFootnotesFilter(tr) {
+            if (!tr.docChanged || tr.isUserEvent('undo') || tr.isUserEvent('redo')) return tr;
+            const state = tr.state, doc = state.doc;
+            const fn = state.field(footnoteField, false);
+            if (!fn) return tr;
+            const head = state.selection.main.head;
+
+            const missing = [];
+            fn.numbers.forEach(function(n, label) { if (!fn.defs.has(label)) missing.push(label); });
+            const section = findNotesSection(doc, fn);
+            if (!section && !missing.length) return tr;
+
+            const newLine = function(label) {
+                return { label: label, text: '[^' + label + ']: ', from: -1, to: -1 };
+            };
+            const byNumber = function(a, b) {
+                const ka = fn.numbers.has(a.label) ? fn.numbers.get(a.label) : Infinity;
+                const kb = fn.numbers.has(b.label) ? fn.numbers.get(b.label) : Infinity;
+                return ka === kb ? 0 : ka < kb ? -1 : 1;   // Array.sort is stable
+            };
+
+            if (!section) {
+                const lines = missing.map(newLine).sort(byNumber).map(function(l) { return l.text; });
+                const tail = doc.sliceString(Math.max(0, doc.length - 2));
+                const gap = tail === '\n\n' ? '' : doc.length && tail.slice(-1) === '\n' ? '\n' : '\n\n';
+                return [tr, { changes: { from: doc.length, insert: gap + lines.join('\n') }, sequential: true }];
+            }
+
+            const labelCount = new Map();
+            fn.defList.forEach(function(d) { labelCount.set(d.label, (labelCount.get(d.label) || 0) + 1); });
+            let items = [];
+            for (let i = section.first; i <= section.last; i++) {
+                const d = fn.defList[i];
+                const empty = !doc.sliceString(d.markerTo, d.lineTo).trim();
+                const cursorHere = head >= d.lineFrom && head <= d.lineTo;
+                if (empty && !cursorHere && (!fn.numbers.has(d.label) || labelCount.get(d.label) > 1)) {
+                    labelCount.set(d.label, labelCount.get(d.label) - 1);
+                    continue;
+                }
+                items.push({ label: d.label, text: doc.sliceString(d.lineFrom, d.lineTo), from: d.lineFrom, to: d.lineTo });
+            }
+            items = items.concat(missing.map(newLine)).sort(byNumber);
+
+            const oldText = doc.sliceString(section.from, section.to);
+            const sep = /\n\n/.test(oldText) ? '\n\n' : '\n';
+            const newText = items.map(function(l) { return l.text; }).join(sep);
+            if (newText === oldText) return tr;
+
+            let from = section.from, to = section.to;
+            if (!items.length) {
+                // the section is gone: at the end of the document, take the blank lines
+                // before it too; with text after it, take its own line break
+                if (to === doc.length) {
+                    while (from > 0 && doc.sliceString(from - 1, from) === '\n') from--;
+                } else {
+                    to++;
+                }
+            }
+            const spec = { changes: { from: from, to: to, insert: newText }, sequential: true };
+            // a cursor inside the rewritten section stays on its note line
+            if (head >= section.from && head <= section.to) {
+                let at = from;
+                for (const l of items) {
+                    if (l.from >= 0 && head >= l.from && head <= l.to) {
+                        spec.selection = { anchor: at + (head - l.from) };
+                        break;
+                    }
+                    at += l.text.length + sep.length;
+                }
+                if (!spec.selection) spec.selection = { anchor: from };
+            }
+            return [tr, spec];
         }
 
         function moveEditorCursor(pos) {
@@ -2337,10 +2655,40 @@ async function init() {
     });
 }
         function setupKeyboardShortcuts() {
-            // Double-escape tracking (declared locally to avoid scope issues)
-            let lastEscapeTime = 0;
-            const doubleEscapeThreshold = 500;
-            
+            // Double-tap Control (⌃⌃) toggles Projects. A "tap" is Control pressed and
+            // released on its own: any other key in between (⌃A, ⌃E, ⌃K…) cancels it.
+            // Not Esc Esc: in fullscreen the browser takes the first Esc to exit
+            // fullscreen. Not ⌥⌥: the Claude desktop app claims it system-wide.
+            const doubleControlThreshold = 400;
+            let controlDown = false;     // Control is held and nothing else pressed yet
+            let lastControlTapTime = 0;
+
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Control') {
+                    if (!e.repeat) controlDown = !(e.metaKey || e.altKey || e.shiftKey);
+                } else {
+                    controlDown = false;
+                    lastControlTapTime = 0;
+                }
+            }, true);
+
+            document.addEventListener('keyup', function(e) {
+                if (e.key !== 'Control' || !controlDown) return;
+                controlDown = false;
+                const now = Date.now();
+                if (now - lastControlTapTime < doubleControlThreshold) {
+                    lastControlTapTime = 0;
+                    if (!promptModal.classList.contains('visible')) toggleProjects();
+                } else {
+                    lastControlTapTime = now;
+                }
+            }, true);
+
+            window.addEventListener('blur', function() {
+                controlDown = false;
+                lastControlTapTime = 0;
+            });
+
             document.addEventListener('keydown', function(e) {
                 const mod = e.metaKey || e.ctrlKey;
 
@@ -2411,9 +2759,18 @@ async function init() {
                     cycleFont(-1);
                 }
 
-                if (mod && e.key === 'f') {
+                // Fullscreen is ⌃⌘F (the macOS standard); ⌘F is Find
+                if (e.metaKey && e.ctrlKey && e.code === 'KeyF') {
                     e.preventDefault();
                     toggleFullscreen();
+                } else if (mod && !e.shiftKey && !e.altKey && e.code === 'KeyF' && cmView && !e.defaultPrevented) {
+                    // ⌘F outside the editor (not in another text field) opens Find too
+                    const a = document.activeElement;
+                    const inField = a && (a.tagName === 'INPUT' || a.tagName === 'TEXTAREA') && !cmView.dom.contains(a);
+                    if (!inField) {
+                        e.preventDefault();
+                        toggleFind(cmView);
+                    }
                 }
 
                 // Endnotes: ⌘⇧6 (⌘^) inserts the next note, ⌘J jumps reference <-> note
@@ -2453,24 +2810,7 @@ async function init() {
                 }
 
                 if (e.key === 'Escape') {
-                    // Check for double-tap FIRST
-                    const now = Date.now();
-                    const timeSinceLastEsc = now - lastEscapeTime;
-                    
-                    console.log('Escape pressed. Time since last:', timeSinceLastEsc + 'ms');
-                    
-                    if (timeSinceLastEsc < doubleEscapeThreshold && timeSinceLastEsc > 0) {
-                        // Double-tap detected!
-                        e.preventDefault();
-                        console.log('✓ Double-Esc detected - Toggle projects');
-                        lastEscapeTime = 0; // Reset to prevent triple-tap issues
-                        toggleProjects();
-                        return;
-                    }
-                    
-                    lastEscapeTime = now;
-                    
-                    // Single Escape - close whatever is open
+                    // Escape closes whatever is open
                     e.preventDefault();
                     const photoLightbox = document.getElementById('photoLightbox');
                     const printShopModal = document.getElementById('printShopModal');
@@ -3128,6 +3468,7 @@ async function init() {
                 updateHashtagLibrary();
                 renderIdeas();
                 renderGlobalIdeas();
+                renderEndnotesPanel();
                 renderProjects();
                 updateProjectTitle();
                 addToHistory(projectId);
@@ -4156,6 +4497,7 @@ ${paragraphs}
 
             if (isOpen) {
                 renderGlobalIdeas();
+                renderEndnotesPanel();
                 setTimeout(() => ideaInput.focus(), 300);
             } else {
                 focusEditor();
@@ -4411,6 +4753,114 @@ ${paragraphs}
                 `;
             }).join('');
         }
+
+        // === ENDNOTES PANEL ===
+        // The lower list of the Ideas panel switches between Recent Ideas and the
+        // current document's endnotes. Both lists fill the same slot (one is hidden),
+        // so the panel's proportions never change. Reads footnoteField; never edits text.
+        // The search box filters ideas only, not endnotes.
+
+        const ideasListToggle = document.getElementById('ideasListToggle');
+        const endnotesList = document.getElementById('endnotesList');
+        let ideasListMode = 'recent';   // 'recent' | 'endnotes', remembered per browser
+        let endnoteTargets = [];        // [{label, toRef}] for each rendered row, by index
+        let lastEndnotesHtml = null;
+
+        function loadIdeasListMode() {
+            try {
+                if (localStorage.getItem('ideasListMode') === 'endnotes') ideasListMode = 'endnotes';
+            } catch (e) {}
+            applyIdeasListMode();
+        }
+
+        function setIdeasListMode(mode) {
+            ideasListMode = mode;
+            try {
+                localStorage.setItem('ideasListMode', mode);
+            } catch (e) {}
+            applyIdeasListMode();
+        }
+
+        function applyIdeasListMode() {
+            const showEndnotes = ideasListMode === 'endnotes';
+            ideasListToggle.querySelectorAll('.ideas-mode-btn').forEach(function(btn) {
+                const active = btn.dataset.mode === ideasListMode;
+                btn.classList.toggle('active', active);
+                btn.setAttribute('aria-pressed', String(active));
+            });
+            globalIdeasList.style.display = showEndnotes ? 'none' : '';
+            endnotesList.style.display = showEndnotes ? '' : 'none';
+            renderEndnotesPanel();
+        }
+
+        function endnoteRow(index, num, text, faded) {
+            const body = text === null ? '<span class="endnote-placeholder">No note yet</span>'
+                : text.trim() === '' ? '<span class="endnote-placeholder">Empty note</span>'
+                : escapeHtml(text);
+            return `<div class="endnote-item${faded ? ' faded' : ''}" data-index="${index}">` +
+                `<span class="endnote-num">${escapeHtml(num)}</span>` +
+                `<span class="endnote-text">${body}</span></div>`;
+        }
+
+        // Cheap no-op unless the panel is open on Endnotes. Called on open, on every
+        // edit (onEditorInput) and on project change (loadProject).
+        function renderEndnotesPanel() {
+            if (ideasListMode !== 'endnotes' || !ideasPanel.classList.contains('open')) return;
+
+            let html;
+            const targets = [];
+            if (!cmView || !footnoteField) {
+                html = '<div class="empty-state">Endnotes need the live editor.</div>';
+            } else {
+                const fn = cmView.state.field(footnoteField);
+                const doc = cmView.state.doc;
+                const rows = [];
+                const noteText = function(def) { return doc.sliceString(def.markerTo, def.lineTo); };
+
+                // Referenced labels in display order, then notes nothing refers to (faded,
+                // shown by label as in the editor)
+                Array.from(fn.numbers.keys())
+                    .sort(function(a, b) { return fn.numbers.get(a) - fn.numbers.get(b); })
+                    .forEach(function(label) {
+                        const def = fn.defs.get(label);
+                        rows.push(endnoteRow(targets.length, String(fn.numbers.get(label)),
+                            def ? noteText(def) : null, !def));
+                        targets.push({ label: label, toRef: !def });
+                    });
+                fn.defs.forEach(function(def, label) {
+                    if (fn.numbers.has(label)) return;
+                    rows.push(endnoteRow(targets.length, label, noteText(def), true));
+                    targets.push({ label: label, toRef: false });
+                });
+
+                html = rows.length ? rows.join('')
+                    : '<div class="empty-state">No endnotes yet. Press ⌘⇧6 or type [^1] to add one.</div>';
+            }
+
+            endnoteTargets = targets;
+            if (html !== lastEndnotesHtml) {
+                endnotesList.innerHTML = html;
+                lastEndnotesHtml = html;
+            }
+        }
+
+        ideasListToggle.addEventListener('click', function(e) {
+            const btn = e.target.closest('.ideas-mode-btn');
+            if (btn && btn.dataset.mode !== ideasListMode) setIdeasListMode(btn.dataset.mode);
+        });
+
+        // Click a note: close the panel (like Recent Ideas) and jump to it in the text
+        endnotesList.addEventListener('click', function(e) {
+            const row = e.target.closest('.endnote-item');
+            if (!row || !cmView || !footnoteField) return;
+            const target = endnoteTargets[Number(row.dataset.index)];
+            if (!target) return;
+            toggleIdeas();
+            if (target.toRef) jumpToFootnoteRef(target.label);
+            else jumpToFootnoteDef(target.label);
+        });
+
+        loadIdeasListMode();
 
         ideaInput.addEventListener('keydown', function(e) {
             if (e.key === 'Enter' && !e.shiftKey) {

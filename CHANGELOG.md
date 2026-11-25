@@ -1,5 +1,40 @@
 # Changelog
 
+## 2026-11-25 — Find (⌘F), and fullscreen moves to ⌃⌘F
+
+- **⌘F opens Find** at the top of the editor, the way it does everywhere else. It
+  searches the whole document (the browser's own find only saw the part on screen),
+  with match case, regular expressions, whole words, and Replace / Replace all.
+  ⌘G and ⌘⇧G go to the next and previous match; ⌘F again or Esc closes it.
+- **Fullscreen is now ⌃⌘F,** the macOS standard, so ⌘F can be Find.
+
+## 2026-11-25 — Notes section that keeps itself
+
+- **Typing a reference by hand now adds its note,** just like ⌘⇧6. Type `[^1]` and
+  the note line appears in the notes section while your cursor stays in the sentence.
+- **The notes section creates itself** at the end of the document with the first
+  note, under a thin "Notes" divider. The divider is drawn by the editor only, so the
+  file stays standard Markdown.
+- **Notes stay in order.** Note lines are sorted by the order of their references, so
+  moving a sentence moves its note too.
+- **Deleting a reference** removes its note if the note was still empty. A note with
+  writing in it is kept (faded, at the end), so a citation is never lost silently.
+- Each automatic change is part of the same undo step as your edit.
+- **Endnotes in the Ideas panel.** The lower list of the Ideas & Notes panel (⌘K) now
+  switches between **Recent Ideas** and **Endnotes**, the current document's notes in
+  order. Click a note to jump to it. The panel's layout is unchanged, and it remembers
+  which list you last chose.
+
+## 2026-11-25 — Projects panel moves to ⌃⌃
+
+- **Double-tap Control (⌃⌃) now opens and closes the Projects panel**, in place of
+  Esc Esc. In fullscreen the browser takes the first Esc to leave fullscreen, so Esc
+  Esc never reached the app there. (⌥⌥ was tried first, but the Claude desktop app
+  claims it system-wide.)
+- Only a clean tap counts: Control pressed and released on its own. Shortcuts like
+  ⌃A or ⌃E don't trigger it.
+- A single Esc still closes whatever panel is open.
+
 ## 2026-11-24 — Endnotes
 
 For long essays: endnotes written in standard Markdown footnote syntax

@@ -15,10 +15,11 @@ Always use the same browser/device to access your projects.
 
 - **Keyboard-first workflow** - Navigate primarily with shortcuts
 - **Live Markdown** - Markdown renders as you write, Obsidian-style: bold, italics, code and links take effect the moment you type past the closing mark, and the symbols reappear when your cursor touches them. Headings, quotes and lists render once you leave the line. Images show inline. Your text is saved exactly as typed
-- **Endnotes** - Add a note with `⌘⇧6`; references show as superscript numbers, notes are numbered in order and kept in order, and a click (or `⌘J`) jumps between a number and its note. Standard Markdown footnote syntax, so notes carry over to other tools
+- **Endnotes** - Add a note with `⌘⇧6` or type `[^1]`; the notes section at the end of the document creates itself and stays in reference order. References show as superscript numbers, and a click (or `⌘J`) jumps between a number and its note. Standard Markdown footnote syntax, so notes carry over to other tools
 - **Projects & folders** - Simple organization to your writing
 - **Ideas & notes panel** - Capture thoughts without losing focus. Promotes Rhizomatic thinking. 
 - **Hashtag system** - Tag and filter ideas across projects
+- **Endnotes at a glance** - In the Ideas panel, switch Recent Ideas to Endnotes to see the document's notes in order; click one to jump to it
 - **Multiple fonts** - Georgia, Traveling Typewriter, Drafting Mono, Times New Roman, Courier New
 - **Background images** - Immerse in the writing environment with original film photography backgrounds
 - **Typing sound effects** - Optional typewriter sounds
@@ -31,10 +32,11 @@ Always use the same browser/device to access your projects.
 ### Essential Commands
 - `⌘S` - Save current project
 - `⌘K` - Toggle Ideas panel
-- `Esc Esc` - Toggle Projects panel (double-tap Escape)
+- `⌃ ⌃` - Toggle Projects panel (double-tap Control)
 - `⌘\` - Toggle History panel
 - `⌘E` - Export menu
-- `⌘F` - Fullscreen
+- `⌘F` - Find (and replace) in the whole document, ⌘F again to close; `⌘G` / `⌘⇧G` next / previous
+- `⌃⌘F` - Fullscreen
 
 ### Writing Environment
 - `⌘B` - Change background image
@@ -56,7 +58,7 @@ Always use the same browser/device to access your projects.
 
 1. Open `index.html` in your browser
 2. Read the User Manual (automatically opens on first visit)
-3. Press `Esc Esc` to open the Projects panel
+3. Double-tap `⌃` (Control) to open the Projects panel
 4. Press `N` to create your first project
 5. Start writing!
 

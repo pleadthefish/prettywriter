@@ -80,10 +80,11 @@ sits bottom-right. Everything else lives in slide-out panels.
 |---|---|
 | ⌘S | Save (autosave also runs as you type) |
 | ⌘K | Ideas panel: notes attached to the current document |
-| Esc Esc | Projects panel: tree of documents and folders |
+| ⌃ ⌃ (double-tap Control) | Projects panel: tree of documents and folders |
 | ⌘\ | History panel: recently opened documents |
 | ⌘E | Export as .txt, .md or .html |
-| ⌘F | Fullscreen |
+| ⌘F | Find and replace across the whole document (⌘G / ⌘⇧G next / previous) |
+| ⌃⌘F | Fullscreen |
 | ⌘B | Next background photo |
 | ⌘P | Random writing prompt |
 | ⌘/ | Typing sounds on/off |
