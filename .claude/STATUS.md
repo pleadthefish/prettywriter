@@ -1,28 +1,27 @@
 # Status: PrettyWriter
 
-*Updated 2026-11-25 · Branch: `main` · Tag: `v1.0` · uncommitted changes (endnotes, project brief) · not pushed (`main` is 11 commits ahead of `origin/main`)*
+*Updated 2026-11-25 · Branch: `main` · Tag: `v1.0` · committed · pushed to `origin/main` (live on GitHub Pages)*
 
 ## Pick up here
 Run `/pickup [goal]`. To run the project: `python3 -m http.server 8000`, then open http://localhost:8000.
 Full background for a fresh assistant: `docs/PROJECT-BRIEF.md`.
 
 ## Where we are
-The live-Markdown editor is merged into `main` locally. The drafting side of endnotes
-is built and tested but not committed. Nothing from this work is on the live site
-(GitHub Pages serves `origin/main`).
+The live-Markdown editor and the drafting side of endnotes are on `main` and pushed,
+so they're live on GitHub Pages. Next big piece: publishing essays (with endnotes).
 
 ## Latest work
-1. **Endnotes, drafting side** (2026-11-24, uncommitted). Standard Markdown footnotes
+1. **Endnotes, drafting side** (2026-11-24, `6339981`). Standard Markdown footnotes
    (`[^1]` and `[^1]: note`) render as superscript numbers and numbered notes with a
    hanging indent, numbered by order of first reference. ⌘⇧6 adds a note in its place in
    the list; ⌘J or a single click jumps between a number and its note. Code in
    `// === ENDNOTES ===` and `buildLivePreview()`. Design:
    `docs/superpowers/specs/2026-11-24-endnotes-design.md`. User Manual, README,
    CHANGELOG and CLAUDE.md updated; the manual's ⌘\ History line was fixed.
-2. **Project brief for Claude Desktop** (2026-11-24, uncommitted).
+2. **Project brief for Claude Desktop** (2026-11-24, `5c73c74`).
    `docs/PROJECT-BRIEF.md`: what the app is, how it's built and works, roadmap, known
    issues. Written for an assistant without repo access.
-3. **Live-Markdown editor merged to `main`** (2026-11-24, `71b51da`, not pushed).
+3. **Live-Markdown editor merged to `main`** (2026-11-24, `71b51da`).
    `writing-polish` merged with `--no-ff`. Added `CHANGELOG.md`; README and the plan's
    status updated.
 4. **Inline syntax reveals per span** (2026-11-24, `7ee6c3e`). Bold, italic, code,
@@ -33,15 +32,13 @@ is built and tested but not committed. Nothing from this work is on the live sit
 
 ## Next steps
 1. **Drew tries endnotes in Safari**, especially ⌘⇧6 (macOS takes it on Touch Bar Macs).
-2. **Commit** the endnotes work and `docs/PROJECT-BRIEF.md` to `main` (ask first).
-3. **Push `main`** to update the live site (ask first; it changes the app Drew writes in).
-4. **Publishing essays, with endnotes:** clean output for Substack and the website.
+2. **Publishing essays, with endnotes:** clean output for Substack and the website.
    Blocked on the open question below. Overlaps the planned rich-text copy-out project.
-5. **Bring `main`'s editor work into `v2-tauri`** when v2 resumes (Tauri shell needs Rust;
+3. **Bring `main`'s editor work into `v2-tauri`** when v2 resumes (Tauri shell needs Rust;
    DiskAdapter and build still to do).
-6. CLAUDE.md's "Current work in progress" covers only the print shop. Add publishing
+4. CLAUDE.md's "Current work in progress" covers only the print shop. Add publishing
    and endnote export there, and mention `.claude/STATUS.md` and `docs/PROJECT-BRIEF.md`.
-7. Optional cleanup: delete the merged `writing-polish` branch; remove the stray
+5. Optional cleanup: delete the merged `writing-polish` branch; remove the stray
    untracked `app/` folder (only `typefaces/.DS_Store`, left over from a v2 checkout).
 
 ## Open questions
